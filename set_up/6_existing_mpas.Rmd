@@ -1,0 +1,90 @@
+---
+title: "6_existing_mpas"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+### load packages
+library(raster)
+library(tidyverse)
+library(sf)
+library(here)
+library(fasterize)
+library(janitor)
+
+```
+
+### Script to prep existing MPAs raster for planning unit input file 
+
+### *STEP 1: Read in MZ EEZ rasters and protected area data*
+```{r}
+## Bring in MZ raster that was created in Script 1 with resolution 10000
+mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"))
+
+## Grab protected area shapefile from computer
+exist_mpa_path <- 'G:/group_project/Data/Existing_mpas'
+mpa_shape <- list.files(exist_mpa_path, full.names = TRUE)
+
+## Read in the shapefile as a simple feature
+mpa_sf <- sf::read_sf(mpa_shape[6]) 
+
+## Check the CRS of the simple feature to make sure it matches the Mozambique Raster 
+st_crs(mpa_sf)
+crs(mz_rast_id)
+
+```
+
+
+```{r}
+
+## Create data frame and update the designated status to "2" so these features will be "locled-in" to our planning unit file for analysis
+# mpa_df <-  mpa_sf %>% 
+#   as.data.frame() %>% 
+#   mutate(STATUS = case_when(STATUS %in% c("Designated") ~ "2"))
+# 
+# ## Pull in MZ Buffer Shapefile
+# mz_buff <- sf::read_sf(here("set_up", "mz_buff.shp"))
+
+## Create a raster from the polygon shapefile
+
+```
+
+
+## *STEP 2: Read in MZ EEZ shapefile to use as mask*
+```{r}
+## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
+mz_eez_path <- 'G:/group_project/data/mz_eez'
+mz_shape <- list.files(mz_eez_path, full.names = TRUE) 
+
+mz_eez_sf <- sf::read_sf(mz_shape[6])
+
+## check coordinate system
+st_crs(mz_eez_sf)
+
+## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
+mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
+```
+
+### *STEP 3: Create knolls raster*
+```{r}
+## Create a raster from the polygon shapefile
+exist_mpa_rast <- fasterize::fasterize(mpa_sf, mz_rast_id) %>%
+  raster::mask(mz_eez_buffer_sf)
+
+## Clip MPA raster to only include marine protected areas
+plot(exist_mpa_rast)
+
+## Save as raster
+writeRaster(exist_mpa_rast, here('set_up/final_rasters/planning_unit/exist_mpas.tif'), overwrite = TRUE)
+
+```
+
+Citations:
+ - 
+ 
+Outputs:
+ -`exist_maps` = raster of existing mpas within Mozambique EEZ at 10000m resolution
+
+End script.

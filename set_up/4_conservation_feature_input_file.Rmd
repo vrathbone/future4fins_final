@@ -1,0 +1,84 @@
+---
+title: "conservation feature input file"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(raster)
+library(tidyverse)
+library(sf)
+library(here)
+library(fasterize)
+```
+
+```{r}
+### read in all conservation features tif files
+coral_rast <- raster(here("set_up", "final_rasters", "conservation_features", "coral", "coral_agg.tif"))
+knolls_rast <- raster(here("set_up", "final_rasters", "conservation_features", "knolls", "knolls.tif"))
+mangrove_rast <- raster(here("set_up", "final_rasters", "conservation_features", "mangrove", "mangrove_agg.tif"))
+seagrass_rast <- raster(here("set_up", "final_rasters", "conservation_features", "seagrass", "seagrass_agg.tif"))
+seamount_rast <- raster(here("set_up", "final_rasters", "conservation_features", "seamount", "seamount.tif"))
+mz_rast <- raster(here("set_up", "final_rasters", "mz_eez_templates","mz_rast_id.tif"))
+```
+
+```{r}
+## Create a file that shows conservation feature name, status (if applicable), and ID
+######## Note we will need to add species data in here once Anna's code is ready
+con_feature_list <- data.frame("name" = c("coral", "mangroves", "seagrass", "seamounts", "knolls"), "status" = NA , stringsAsFactors=FALSE)
+con_feature_id <- con_feature_list %>% 
+  mutate(id = rownames(con_feature_list))
+
+## Write the file to csv 
+write_csv(con_feature_id, here("set_up", "csv_files", "con_feature_name_status.csv"))
+```
+
+
+```{r}
+## Now create a conservation feature file that shows the id, target, spf and name **note this is often referred to as the species file for Marxan input which is why it is named that below. 
+## We set the target at 50 and the SPF at 200 for now
+species_file <- con_feature_id %>%
+  select(id,name) %>%
+  mutate(prop = .50, spf = 1)
+## Write the species file to csv 
+write_csv(species_file, here("set_up", "csv_files", "mz_species.csv"))
+write_csv(species_file, here("set_up", "csv_files", "mz_species.dat"))
+```
+
+```{r}
+## Create a raster stack
+con_stack = stack(coral_rast, knolls_rast, mangrove_rast, seagrass_rast, seamount_rast, mz_rast)
+
+## Visiually make sure all rasters look ok before proceeding
+plot(con_stack)
+
+## create df from the stacked rasters - we may want to remove NA's  - check more on this
+con_df <- as.data.frame(con_stack)
+con_df_longer <- con_df %>% 
+  pivot_longer(coral_agg:seamount,
+               names_to = "species",
+               values_to = "amount") %>%
+  rename(
+    pu = mz_rast_id
+  ) %>% 
+  na.omit()
+
+# Change spcies names to ID's from mz_species file created in previous step
+con_df_final <- con_df_longer %>%
+  mutate(species = case_when(species == "coral_agg" ~ 1,
+                             species == "mangrove_agg" ~ 2,
+                             species == "seagrass_agg" ~ 3,
+                             species == "seamount" ~ 4,
+                             species == "knolls" ~ 5))
+```
+
+
+```{r}
+## Write this to a csv file to be used as the 'Planning Unit versus Conservation Feature File'
+write_csv(con_df_final, here("set_up", "csv_files", "puvsspr.csv"))
+
+# write as .dat file format
+write_csv(con_df_final, here("set_up", "dat_files", "puvsspr.dat"))
+  
+```
+
