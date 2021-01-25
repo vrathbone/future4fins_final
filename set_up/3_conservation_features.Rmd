@@ -226,6 +226,29 @@ plot(features_stack, main = paste("Feature", seq_len(nlayers(features_stack))),
      nr = 2, box = FALSE, axes = FALSE)
 
 ## Looks good, let's save as a multilayer feature tif
-writeRaster(features_stack, filename=here("set_up","final_rasters","conservation_features", "multilayer_feature.tif"), options="INTERLEAVE=BAND", overwrite=TRUE)
+writeRaster(features_stack, filename=here("set_up","final_rasters","conservation_features", "habitat_stack.tif"), options="INTERLEAVE=BAND", overwrite=TRUE)
 ```
+
+Citations:
+ - 
+ 
+Outputs:
+ -`aca_coral` = raster of coral within Mozambique EEZ at 100m resolution
+ -`aca_coral_agg` = raster of coral within Mozambique EEZ aggregated to match 10000m resolution
+ -`aca_seagrass` = raster of seagrass within Mozambique EEZ at 100m resolution
+ -`aca_seagrass_agg` = raster of seagrass within Mozambique EEZ aggregated to match 10000m resolution
+ -`mangrove` = raster of mangrove within Mozambique EEZ at 100m resolution
+ -`mangrove_agg` = raster of mangrove within Mozambique EEZ aggregated to match 10000m resolution
+ -`knolls` = raster of knolls within Mozambique EEZ at 10000m resolution
+ -`seamounts` = raster of seamounts within Mozambique EEZ at 10000m resolution
+ -`habitat_stack` = raster stack of all critical habitats
+
+ 
+End script.
+
+
+
+
+
+
 

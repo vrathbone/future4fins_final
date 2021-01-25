@@ -162,11 +162,28 @@ for (i in seq_along(species_name)) {
 }
 ```
 
+#### **STEP 7: Creating Species Stack**
+```{r}
+### create file path to read in all 30 species tifs in 
+species_path <- 'G:/group_project/future4fins/future4fins/set_up/final_rasters/conservation_features/iucn_species'
+species_files <- list.files(species_path, full.names = TRUE)
+
+### stack them 
+species_stack <- stack(species_files)
+
+### plot to see how they look
+plot(species_stack)
+
+### write raster
+writeRaster(species_stack, here('set_up/final_rasters/conservation_features/species_stack.tif'), overwrite = TRUE)
+```
+
 Citations:
  - 
  
 Outputs:
- - `species_XXX XXX` = tif files of each focal species to be used ( total)
+ - `species_XXX XXX` = tif files of each focal species to be used (27 total)
+ - `species_stack.tif` = raster stack of all focal species for conservation features
  
 End script.
 

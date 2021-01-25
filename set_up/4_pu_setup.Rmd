@@ -1,0 +1,105 @@
+---
+title: "4_pu_setup"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load in packages
+library(raster)
+library(tidyverse)
+library(sf)
+library(here)
+library(fasterize)
+library(janitor)
+```
+
+### **STEP 1: Read in Mozambique EEZ and Shapefile**
+```{r}
+## read in MZ EEZ tif
+mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"))
+
+## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
+mz_eez_path <- 'G:/group_project/data/mz_eez'
+mz_shape <- list.files(mz_eez_path, full.names = TRUE) 
+
+mz_eez_sf <- sf::read_sf(mz_shape[6])
+
+## check coordinate system
+st_crs(mz_eez_sf)
+
+## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
+mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
+```
+
+
+### **STEP 2: Setting up existing marine protected areas**
+```{r}
+## Grab protected area shapefile from computer
+exist_mpa_path <- 'G:/group_project/Data/Existing_mpas'
+mpa_shape <- list.files(exist_mpa_path, full.names = TRUE)
+
+## Read in the shapefile as a simple feature
+mpa_sf <- sf::read_sf(mpa_shape[6]) 
+
+## Check the CRS of the simple feature to make sure it matches the Mozambique Raster 
+st_crs(mpa_sf)
+
+## CRS matches so lets make a raster using the mz_rast_id to set the extent
+mpa_rast <- fasterize::fasterize(mpa_sf, mz_rast_id)
+
+## Double check the CRS again 
+crs(mpa_rast)
+
+## Plot to make sure it looks good, note this shapefile includes all terrestrial protected areas as well so we need to clip it to just include those in the water (the EEZ)
+plot(mpa_rast)
+
+## Mask the rater to the EEZ 
+mpa_rast <- mask(mpa_rast, mz_eez_sf) 
+
+## Double check CRS of new raster & plot to make sure it looks good
+crs(mpa_rast)
+plot(mpa_rast)
+
+## Looks good! Save as a tif file
+writeRaster(mpa_rast, here('set_up/final_rasters/planning_unit/exist_mpa.tif'), overwrite = TRUE)
+```
+
+
+### **STEP 3: Set up raster of oil development areas**
+```{r}
+## Read in oil tif from local computer as a raster
+oil_tif <- 'G:/group_project/Data/Oil_rigs/oil_rig_2013_halpern_et_al_2015_clipped.tif'
+
+## Create raster
+oil_rast <- raster(oil_tif)
+
+## Reproject the oil raster to match the Moz EEZ raster
+oil_reproj <- raster::projectRaster(oil_rast, mz_rast_id, 
+                                            res = 10000,
+                                            method = 'ngb',
+                                            crs = crs(mz_rast_id))
+
+## Plot to see what it looks like
+plot(oil_reproj)
+
+## There are terrestrial oil projects included in this file so we will need to again maks it to the MZ EEZ
+oil_rast <- mask(oil_reproj, mz_eez_sf) 
+
+## Plot to make sure it looks good
+plot(oil_rast)
+
+## Looks good! Save it as a tif
+writeRaster(oil_rast, here('set_up/final_rasters/planning_unit/oil_rig.tif'), overwrite = TRUE)
+```
+
+Citations:
+ - 
+ 
+Outputs:
+
+ - `exist_mpa` = raster of existing MPAs in Mozambique's EEZ 
+ - `oil_rig` = raster of existing oil rigs in Mozambique's EEZ
+
+End script.

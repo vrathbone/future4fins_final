@@ -1,0 +1,212 @@
+---
+title: "Scenario 1: Area Model Run"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(raster)
+library(tidyverse)
+library(sf)
+library(here)
+library(fasterize)
+library(stringr)
+library(janitor)
+library(prioritizr)
+```
+
+## Scenario 1 - Baseline
+The objective of this scenario was to protect important areas for sharks and rays based on their distribution from IUCN and location of suitable habitats using a uniform cost for all planning units. For this run, we used area as the cost, set targets of 20% for all conservation features, locked in planning units that included existing MPAs, and set a boundary penalty to zero. 
+
+### STEP 1: Assign planning units, cost layer, and conservation feature
+
+#### Planning Unit
+```{r}
+### reading in the baseline MZ EEZ raster (with cell ids) 
+pu <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
+
+### plot to make sure it looks okay
+plot(pu)
+### looks good, but need a mask so must mask it
+
+### to mask the raster:
+## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
+mz_eez_path <- 'G:/group_project/data/mz_eez'
+mz_shape <- list.files(mz_eez_path, full.names = TRUE) 
+
+## Read in shapefile as simple feature 
+mz_eez_sf <- sf::read_sf(mz_shape[6])
+
+## check coordinate system
+st_crs(mz_eez_sf)
+
+## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
+mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
+
+pu <- mask(pu, mz_eez_buffer_sf)
+
+### now see what it looks like with a mask
+plot(pu)
+```
+
+#### Cost Layer
+Other scenarios will require more prep to create cost layer, so they will be found in separate Rmarkdowns. Since this scenario is so short, we created it in this Rmarkdown. 
+```{r}
+### pull in the initial MZ EEZ raster to start with
+area_raster <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
+
+### assign a uniform cost value of 0.5 to all cells since the area of the planning units are the same. 
+### We assigned a value of 0.5 since we will transform cost layers in future simulations to be between 0-1 and this 0.5 is a middle value in this range 
+values(area_raster) <- 0.5
+
+### mask the area raster to just the MZ EEZ, so all cells outside the EEZ are assigned NA AND rename it to cost_area
+cost_area <- mask(area_raster, pu)
+
+### check it by plotting!
+plot(cost_area)
+
+### write raster
+writeRaster(cost_area, here('set_up/final_rasters/area_cost.tif'), overwrite = TRUE)
+
+```
+
+
+#### Conservation Features
+This includes all species distributions and habitat rasters
+
+
+**Creating Species Stack**
+```{r}
+# ### create file path to read in all 30 species tifs in 
+# species_path <- 'G:/group_project/future4fins/future4fins/set_up/final_rasters/conservation_features/iucn_species'
+# species_files <- list.files(species_path, full.names = TRUE)
+# 
+# ### stack them 
+# species_stack <-  stack(species_files)
+# 
+# ### plot to see how they look
+# plot(species_stack)
+
+### write raster
+# writeRaster(species_stack, here('set_up/final_rasters/species_stack.tif'), overwrite = TRUE)
+```
+
+
+Creating Habitat Stack
+```{r}
+# ### reading in all habitat rasters
+# aca_coral_rast <- raster(here("set_up", "final_rasters", "conservation_features", "coral", "aca_coral_agg.tif"))
+# knolls_rast <- raster(here("set_up", "final_rasters", "conservation_features", "knolls", "knolls.tif"))
+# 
+# mangrove <- raster(here("set_up", "final_rasters", "conservation_features", "mangrove", "mangrove.tif"))
+# 
+# aca_seagrass_rast <- raster(here("set_up", "final_rasters", "conservation_features", "seagrass", "aca_seagrass_agg.tif"))
+# seamount_rast <- raster(here("set_up", "final_rasters", "conservation_features", "seamounts", "seamount.tif"))
+# mz_rast <- raster(here("set_up", "final_rasters", "mz_eez_templates","mz_rast_id.tif"))
+# 
+# habitat_stack <- stack(aca_coral_rast, knolls_rast, mangrove_rast, aca_seagrass_rast, seamount_rast)
+# 
+# plot(habitat_stack)
+# 
+# ### write raster
+# writeRaster(habitat_stack, here('set_up/final_rasters/habitat_stack.tif'), options="INTERLEAVE=BAND", overwrite = TRUE)
+```
+
+Creating Final Conservation Feature 
+```{r}
+### read in species raster stack created in the species rmd
+species_stack <-  raster(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
+
+### read in critical habitat stack created in the conservation features rmd
+habitat_stack <-  raster(here("set_up", "final_rasters", "conservation_features", "habitat_stack.tif"))
+
+### stack all species and habitat
+features_stack <- stack(habitat_stack,species_stack)
+
+### change into a dataframe to check it
+features_df <- as.data.frame(features_stack)
+
+### write raster
+writeRaster(features_stack, here('set_up/final_rasters/all_features_stack.tif'),options="INTERLEAVE=BAND", overwrite = TRUE)
+```
+
+
+### Additional Files (Locked-in & Locked-out)
+```{r}
+### read in existing mpas raster
+exist_mpas <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
+
+### read in oil rigs rasters
+oil_rast <- raster(here("set_up", "final_rasters", "planning_unit", "oil_rig.tif"))
+```
+
+
+## SCENARIO 1: Baseline - 20% target, Boundary Penalty = 0 
+```{r}
+### OBJECTIVE: Minimize area while meeting 20% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+prob_area <- problem(cost_area, features = features_stack) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas) %>%
+  add_locked_out_constraints(oil_rast) %>%
+  add_gurobi_solver(gap = 0.1, time_limit = 1200)
+## Solve problem
+sprob_area <- solve(prob_area)
+## Plot the solution to see what it looks like
+plot(sprob_area,  main = c("Area- 20% Targets"))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
