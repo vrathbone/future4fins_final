@@ -15,51 +15,117 @@ library(fasterize)
 library(janitor)
 ```
 
-### STEP 1: Create raster of Coral
+### **STEP 1: Read in Mozambique EEZ and Shapefile**
 ```{r}
-## Bring in MZ raster that was created in Script 1 - 100 m resolution
-mz_rast_100 <- raster(here("rasters/mz_id_100.tif"))
+## read in MZ EEZ tif
+mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"))
 
-## Bring in MZ raster that was created in Script 1 - 10000 m resolution
-mz_rast <- raster(here("rasters/mz_id.tif"))
+## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
+mz_eez_path <- 'G:/group_project/data/mz_eez'
+mz_shape <- list.files(mz_eez_path, full.names = TRUE) 
 
-## Grag coral shapefile from local computer
-coral_path <- 'G:/group_project/Data/Habitats/coral'
-coral_shape <- list.files(coral_path, full.names = TRUE) 
+mz_eez_sf <- sf::read_sf(mz_shape[6])
 
-## Read in shapefile as a simple feature and select the columns that are relevant
-coral_sf <- sf::read_sf(coral_shape[6])%>% 
-  select("METADATA_I", "LOC_DEF", "GIS_AREA_K", "START_DATE", "END_DATE", "Shape_Leng", "Shape_Le_1", "Shape_Area")
+## check coordinate system
+st_crs(mz_eez_sf)
 
-## Check the CRS of the coral sf to make sure it matches the CRS of mz_rast
-st_crs(mz_rast)
-st_crs(coral_sf)
+## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
+mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 
-## Create data frame to easily check data inside coral sf
-coral_df <- coral_sf %>% as.data.frame() %>% select(-geometry)
+## Grab Moz Exclusive Economic Zone (EEZ)  at 100m shapefile from local computer
+mz_eez_100_path <- 'G:/group_project/data/mz_raster'
+mz_100_shape <- list.files(mz_eez_100_path, full.names = TRUE) 
 
-## Make a raster of the coral simple feature using mz_rast_100 - the raster we created at a smaller resolution to set extent and mask to the mz_eez
-coral_raster <- fasterize::fasterize(coral_sf, mz_rast_100)%>%
-  mask(mz_eez_buffer_sf)
-
-## plot to make sure it looks good
-plot(coral_raster)
-
-## Now we will aggregate to become a coaser resoltuion that matches our other rasters at 10000 m
-coral_agg <- raster::aggregate(coral_raster, fact=100, fun=sum, na.rm=TRUE)
-coral_agg_percent <- coral_agg/10000
-
-coral_rast <- mask(coral_agg_percent, mz_eez_buffer_sf)
-
-plot(coral_rast)
-
-## Save as raster
-writeRaster(coral_rast, here('rasters/coral.tif'), overwrite = TRUE)
+mz_rast_100 <- raster(mz_100_shape[1])
 
 ```
 
+### **STEP 2: Read in ACA data for Coral and Seagrass Shapefiles**
+```{r}
+## Grab aca shapefile from local computer
+## Path to get data on G shared drive at Bren
+aca_path <- 'G:/group_project/Data/Habitats/ACA_classes'
+aca_shape <- list.files(aca_path, full.names = TRUE) 
 
-### STEP 2: Mangroves
+## Read in shapefile as a simple feature and tranform to the correct crs
+aca_sf <- sf::read_sf(aca_shape[8])%>% 
+  st_transform(., crs = st_crs(mz_eez_sf))
+
+## Check the CRS of the coral sf to make sure it matches the CRS of mz_rast
+crs(mz_rast_id)
+st_crs(aca_sf)
+
+## Create data frame to easily check data inside sf
+aca_df <- aca_sf %>% 
+  as.data.frame() %>% 
+  select(-geometry) 
+```
+
+### **STEP 3: Create all habitat rasters**
+
+#### CORAL
+```{r}
+### coral shapefile
+aca_coral_sf <- aca_sf %>% 
+  filter(Ecosystem == "Coral Reefs") %>% 
+  select(-class)
+
+## Make a raster of the coral simple feature using mz_rast_100 - the raster we created at a smaller resolution to set extent and mask to the mz_eez_buffer_sf
+aca_coral_raster <- fasterize::fasterize(aca_coral_sf, mz_rast_100)%>%
+  mask(mz_eez_buffer_sf)
+
+## plot to make sure it looks good
+plot(aca_coral_raster) # look closely it's there!
+
+## Save as raster
+writeRaster(aca_coral_raster, here('set_up/final_rasters/conservation_features/coral/aca_coral.tif'), overwrite = TRUE)
+
+# Aggregate to become a coarser resolution at 10000 m
+aca_coral_raster_agg <- raster::aggregate(aca_coral_raster, fact=100, fun=sum, na.rm = TRUE)
+aca_coral_aggregate_per <- aca_coral_raster_agg/10000
+
+## mask to the MZ EEZ
+aca_coral_aggregate_per <- mask(aca_coral_aggregate_per, mz_eez_buffer_sf)
+
+## Lets plot to see what it looks like
+plot(aca_coral_aggregate_per)
+
+## Save coral aggregate as raster
+writeRaster(aca_coral_aggregate_per, here('set_up/final_rasters/conservation_features/coral/aca_coral_agg.tif'), overwrite = TRUE)
+```
+
+
+#### SEAGRASS
+```{r}
+### seagrass shapefile
+aca_seagrass_sf <- aca_sf %>% 
+  filter(Ecosystem == "Seagrass") %>% 
+  select(-class)
+
+## Let's create a rsater using the mz_rast with resolution of 10000 and mask to the MZ EEZ
+aca_seagrass_raster <- fasterize::fasterize(aca_seagrass_sf, mz_rast_100) %>% 
+  mask(mz_eez_buffer_sf)
+
+## plot to make sure it looks good
+plot(aca_seagrass_raster)
+
+## Save as raster
+writeRaster(aca_seagrass_raster, here('set_up/final_rasters/conservation_features/seagrass/aca_seagrass.tif'), overwrite = TRUE)
+
+# Aggregate to become a coarser resolution at 10000 m
+aca_seagrass_raster_agg <- raster::aggregate(aca_seagrass_raster, fact=100, fun=sum, na.rm = TRUE)
+aca_seagrass_aggregate_per <- aca_seagrass_raster_agg/10000
+
+aca_seagrass_aggregate_per <- mask(aca_seagrass_aggregate_per, mz_eez_buffer_sf)
+
+plot(aca_seagrass_aggregate_per)
+
+## Save coral aggregate as raster
+writeRaster(aca_seagrass_aggregate_per, here('set_up/final_rasters/conservation_features/seagrass/aca_seagrass_agg.tif'), overwrite = TRUE)
+```
+
+
+#### MANGROVES
 ```{r}
 ## Path to get data on G shared drive at Bren
 mangrove_path <- 'G:/group_project/Data/Habitats/mangroves'
@@ -73,7 +139,7 @@ mangrove_sf <- sf::read_sf(mangrove_shape[6]) %>%
 plot(mangrove_sf)
 
 ## Check the CRS of the mangrove sf and compare to mz_rast
-st_crs(mz_rast)
+st_crs(mz_rast_id)
 st_crs(mangrove_sf)
 
 ## Create data frame to easily check data inside coral sf
@@ -96,15 +162,12 @@ mangrove_rast <- mask(mangrove_agg_percent, mz_eez_buffer_sf)
 plot(mangrove_rast)
 
 ## Lookgs good - let's save as a tif file
-writeRaster(mangrove_agg_percent, here('rasters/mangrove.tif'), overwrite = TRUE)
+writeRaster(mangrove_agg_percent, here('set_up/final_rasters/conservation_features/mangrove/mangrove.tif'), overwrite = TRUE)
 
 ```
 
-### Seamounts
+#### SEAMOUNTS
 ```{r}
-## Bring in MZ raster that was created in Script 1 with resolution 10000
-mz_rast <- raster(here("rasters/mz_id.tif"))
-
 ## Grab seamount shapefile from the local computer
 seamount_path <- 'G:/group_project/Data/Habitats/seamounts'
 seamount_shape <- list.files(seamount_path, full.names = TRUE)
@@ -113,21 +176,21 @@ seamount_shape <- list.files(seamount_path, full.names = TRUE)
 seamount_sf <- sf::read_sf(seamount_shape[6]) 
 
 ## Check the CRS of the seamount and compare to the mz rast
-st_crs(mz_rast)
+st_crs(mz_rast_id)
 st_crs(seamount_sf)
 
 ## Let's create a rsater using the mz_rast with resolution of 10000 and mask tot the MZ EEZ
-seamount_raster <- fasterize::fasterize(seamount_sf, mz_rast)%>%
+seamount_raster <- fasterize::fasterize(seamount_sf, mz_rast_id)%>%
   mask(mz_eez_buffer_sf)
 
 ## Plot to see what it looks like
 plot(seamount_raster)
 
 # Looks good lets save as a tif
-writeRaster(seamount_raster, here('rasters/seamount.tif'), overwrite = TRUE)
+writeRaster(seamount_raster, here('set_up/final_rasters/conservation_features/seamounts/seamount.tif'), overwrite = TRUE)
 ```
 
-### Knolls
+#### KNOLLS
 ```{r}
 ## Grab knolls shapefile from the local computer
 knolls_path <- 'G:/group_project/Data/Habitats/knolls'
@@ -140,45 +203,21 @@ knolls_sf <- sf::read_sf(knolls_shape[6])
 st_crs(knolls_sf)
 
 ## Let's create a rsater using the mz_rast with resolution of 10000 and mask tot the MZ EEZ
-knolls_raster <- fasterize::fasterize(knolls_sf, mz_rast)%>%
+knolls_raster <- fasterize::fasterize(knolls_sf, mz_rast_id)%>%
   mask(mz_eez_buffer_sf)
 
 ## Plot to see what it looks like
 plot(knolls_raster)
 
 # Looks good - lets save as a tif
-writeRaster(knolls_raster, here('rasters/knolls.tif'), overwrite = TRUE)
+writeRaster(knolls_raster, here('set_up/final_rasters/conservation_features/knolls/knolls.tif'), overwrite = TRUE)
 
 ```
+### **STEP 3: Create raster stack**
 
-### Seagrass
-```{r}
-## Grab seagrass shapefile from the local computer
-seagrass_path <- 'G:/group_project/Data/Habitats/seagrass'
-seagrass_shape <- list.files(seagrass_path, full.names = TRUE)
-
-## Load shapefile as simple feature
-seagrass_sf <- sf::read_sf(seagrass_shape[22]) %>% 
-  select("PARENT_ISO", "FAMILY", "SPECIES", "PROTECT", "METADATA_I", "GIS_AREA_K", "Shape_Leng", "Shape_Area", "geometry")
-
-## Check the CRS of the seagrass simple feature
-st_crs(seagrass_sf)
-
-## Let's create a rsater using the mz_rast with resolution of 10000 and mask tot the MZ EEZ
-seagrass_raster <- fasterize::fasterize(seagrass_sf, mz_rast)%>%
-  mask(mz_eez_buffer_sf)
-
-## Plot to make sure it looks good
-plot(seagrass_raster)
-
-## Looks good - lets save as a tif
-writeRaster(seagrass_raster, here('rasters/seagrass.tif'), overwrite = TRUE)
-```
-
-### Now its time to create a conservation feature raster stack and save as a tif
 ```{r}
 ## Create a features stack from all five critical habitats created in the previous steps
-features_stack <- stack(coral_rast, mangrove_rast, seagrass_raster, seamount_raster, knolls_raster)
+features_stack <- stack(aca_coral_raster_agg, mangrove_rast, aca_seagrass_raster_agg, seamount_raster, knolls_raster)
 
 ## Plot to see what it looks like
 plot(features_stack)
@@ -187,6 +226,6 @@ plot(features_stack, main = paste("Feature", seq_len(nlayers(features_stack))),
      nr = 2, box = FALSE, axes = FALSE)
 
 ## Looks good, let's save as a multilayer feature tif
-writeRaster(features_stack, filename=here("rasters", "multilayer_feature.tif"), options="INTERLEAVE=BAND", overwrite=TRUE)
+writeRaster(features_stack, filename=here("set_up","final_rasters","conservation_features", "multilayer_feature.tif"), options="INTERLEAVE=BAND", overwrite=TRUE)
 ```
 
