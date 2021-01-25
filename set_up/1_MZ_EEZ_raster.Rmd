@@ -62,7 +62,7 @@ mz_rast_id_df <- rasterToPoints(mz_rast_id) %>% as.data.frame()
 plot(mz_rast_id)
 
 ## Let's save this cell id raster as tif file - hashtagged this out for now since the tif is too big
-#writeRaster(mz_rast_id, here('set_up/final_rasters/mz_eez_templates/mz_rast_id.tif'), overwrite = TRUE)
+writeRaster(mz_rast_id, here('set_up/final_rasters/mz_eez_templates/mz_rast_id.tif'), overwrite = TRUE)
 
 ### Let's save this mz raster with cell ids as tif file
 #writeRaster(mz_eez_rast, here('set_up/final_rasters/mz_eez_templates/mz_eez_rast.tif'), overwrite = TRUE) --> do we need this?
