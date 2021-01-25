@@ -122,7 +122,7 @@ return('yay it works')
 
 #### **STEP 5: Create Vector of Species Names for Loop**
 ```{r}
-### create vector o
+### create vector 
 species_name <- c("Alopias pelagicus",
                  "Alopias superciliosus",
                  "Alopias vulpinus",
@@ -139,16 +139,13 @@ species_name <- c("Alopias pelagicus",
                  "Sphyrna mokarran",
                  "Sphyrna zygaena",
                  "Stegostoma tigrinum",
-                 "Megatrygon microps",
                  "Mobula alfredi",
                  "Mobula birostris",
                  "Mobula kuhlii",
                  "Mobula mobular",
-                 "Mobula tarapacana",
                  "Mobula thurstoni",
                  "Pristis pristis",
                  "Pristis zijsron",
-                 "Raja ocellifera",
                  "Rostroraja alba",
                  "Rhina ancylostoma",
                  "Rhynchobatus australiae",
@@ -164,6 +161,14 @@ for (i in seq_along(species_name)) {
   create_rast(iucn_sf, species_name[i])
 }
 ```
+
+Citations:
+ - 
+ 
+Outputs:
+ - `species_XXX XXX` = tif files of each focal species to be used ( total)
+ 
+End script.
 
 
 
