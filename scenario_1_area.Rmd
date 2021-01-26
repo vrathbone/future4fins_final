@@ -14,6 +14,8 @@ library(fasterize)
 library(stringr)
 library(janitor)
 library(prioritizr)
+library(gurobi)
+
 ```
 
 ## Scenario 1 - Baseline
@@ -92,27 +94,6 @@ This includes all species distributions and habitat rasters
 # writeRaster(species_stack, here('set_up/final_rasters/species_stack.tif'), overwrite = TRUE)
 ```
 
-
-Creating Habitat Stack
-```{r}
-# ### reading in all habitat rasters
-# aca_coral_rast <- raster(here("set_up", "final_rasters", "conservation_features", "coral", "aca_coral_agg.tif"))
-# knolls_rast <- raster(here("set_up", "final_rasters", "conservation_features", "knolls", "knolls.tif"))
-# 
-# mangrove <- raster(here("set_up", "final_rasters", "conservation_features", "mangrove", "mangrove.tif"))
-# 
-# aca_seagrass_rast <- raster(here("set_up", "final_rasters", "conservation_features", "seagrass", "aca_seagrass_agg.tif"))
-# seamount_rast <- raster(here("set_up", "final_rasters", "conservation_features", "seamounts", "seamount.tif"))
-# mz_rast <- raster(here("set_up", "final_rasters", "mz_eez_templates","mz_rast_id.tif"))
-# 
-# habitat_stack <- stack(aca_coral_rast, knolls_rast, mangrove_rast, aca_seagrass_rast, seamount_rast)
-# 
-# plot(habitat_stack)
-# 
-# ### write raster
-# writeRaster(habitat_stack, here('set_up/final_rasters/habitat_stack.tif'), options="INTERLEAVE=BAND", overwrite = TRUE)
-```
-
 Creating Final Conservation Feature 
 ```{r}
 ### read in species raster stack created in the species rmd
@@ -142,7 +123,7 @@ oil_rast <- raster(here("set_up", "final_rasters", "planning_unit", "oil_rig.tif
 ```
 
 
-## SCENARIO 1: Baseline - 20% target, Boundary Penalty = 0 
+## SCENARIO 1: Baseline - 20% target, Boundary Penalty = 0,  
 ```{r}
 ### OBJECTIVE: Minimize area while meeting 20% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
 
@@ -151,8 +132,7 @@ prob_area <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_locked_out_constraints(oil_rast) %>%
-  add_gurobi_solver(gap = 0.1, time_limit = 1200)
+  add_gurobi_solver(gap = 0.01, time_limit = 120)
 
 ## Solve problem
 sprob_area <- solve(prob_area)
@@ -163,6 +143,39 @@ plot(sprob_area,  main = c("Area- 20% Targets"))
 ```
 
 
+## SCENARIO 2: Baseline - 10% target, Boundary Penalty = 0 
+```{r}
+### OBJECTIVE: Minimize area while meeting 20% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+prob_area_10 <- problem(cost_area, features = features_stack) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.1) %>%
+  add_locked_in_constraints(exist_mpas) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120)
+
+## Solve problem
+sprob_area_10 <- solve(prob_area_10)
+## Plot the solution to see what it looks like
+plot(sprob_area_10,  main = c("Area- 10% Targets"))
+```
+
+## SCENARIO 3: Baseline - 30% target, Boundary Penalty = 0 
+```{r}
+### OBJECTIVE: Minimize area while meeting 20% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+prob_area_30 <- problem(cost_area, features = features_stack) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120)
+
+## Solve problem
+sprob_area_30 <- solve(prob_area_30)
+## Plot the solution to see what it looks like
+plot(sprob_area_30,  main = c("Area- 10% Targets"))
+```
 
 
 
