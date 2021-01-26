@@ -61,6 +61,10 @@ mz_rast_id_df <- rasterToPoints(mz_rast_id) %>% as.data.frame()
 ## Plot to make sure it looks good
 plot(mz_rast_id)
 
+## Mask it to only include the EEZ
+mz_rast_id <- mask(mz_rast_id, mz_eez_buffer_sf)
+plot(mz_rast_id)
+
 ## Let's save this cell id raster as tif file - hashtagged this out for now since the tif is too big
 writeRaster(mz_rast_id, here('set_up/final_rasters/mz_eez_templates/mz_rast_id.tif'), overwrite = TRUE)
 
