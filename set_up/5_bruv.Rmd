@@ -12,6 +12,7 @@ library(janitor)
 library(here)
 library(sf)
 library(fasterize)
+library(tmap)
 ```
 
 *NOT SURE IF WE ACTUALLY NEED TO INCLUDE THIS FOR JUST LOOKING AT OCCURRENCE DATA*
@@ -60,7 +61,7 @@ mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"
 ```{r}
 ## Create a data frame that only contains the lat/long coordinates and an id number
 wcs_mz_bruv_maxn_points <- wcs_mz_bruv_maxn %>% 
-  select(lat_x, long_y) %>% 
+  select(lat_x, long_y,genus_species) %>% 
   drop_na(long_y) %>%  # had to remove NAs for the next function to work
   mutate(id=1:n()) 
 
@@ -76,6 +77,12 @@ ggplot() +
   geom_sf(data = mz_eez_sf) +
   geom_sf(data = wcs_bruv_sf_maxn, aes(color = id),
           show.legend = FALSE)
+
+tmap_mode("view") # Set to interactive viewing
+
+tm_shape(wcs_bruv_sf_maxn) +
+  tm_dots("genus_species", clustering = T, legend.show = FALSE, size = 0.5) +
+  tm_basemap("Stamen.Terrain")
 
 ```
 
@@ -137,6 +144,11 @@ ggplot() +
   geom_sf(data = popmr_bruv_sf, aes(color = id),
           show.legend = FALSE)
 
+tmap_mode("view") # Set to interactive viewing
+
+tm_shape(popmr_bruv_sf) +
+  tm_dots("id", clustering = T, legend.show = FALSE, size = 0.5) +
+  tm_basemap("Stamen.Terrain")
 ```
 
 ### *STEP 4: Create a sp object and raster of BRUV data*
@@ -197,6 +209,9 @@ ggplot() +
   geom_sf(data = nm_bruv_sf, aes(color = id),
           show.legend = FALSE)
 
+tm_shape(nm_bruv_sf) +
+  tm_dots("id", clustering = T, legend.show = FALSE, size = 0.5) +
+  tm_basemap("Stamen.Terrain")
 ```
 
 ### *STEP 4: Create a sp object and raster of BRUV data*

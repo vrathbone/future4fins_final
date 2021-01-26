@@ -153,6 +153,7 @@ prob_area <- problem(cost_area, features = features_stack) %>%
   add_locked_in_constraints(exist_mpas) %>%
   add_locked_out_constraints(oil_rast) %>%
   add_gurobi_solver(gap = 0.1, time_limit = 1200)
+
 ## Solve problem
 sprob_area <- solve(prob_area)
 ## Plot the solution to see what it looks like
