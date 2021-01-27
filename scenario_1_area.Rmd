@@ -14,7 +14,8 @@ library(fasterize)
 library(stringr)
 library(janitor)
 library(prioritizr)
-#library(gurobi)
+library(rgdal)
+library(gurobi)
 
 ```
 
