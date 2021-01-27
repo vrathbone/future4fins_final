@@ -144,6 +144,6 @@ industrial_stack = stack(long_line_rast, gamba_rast, shrimp_rast, tuna_rast, mz_
 
 plot(industrial_stack)
 
-
+writeRaster(industrial_stack, here('set_up/final_rasters/costs/cost_industrial_stack.tif'), overwrite = TRUE)
 ```
 

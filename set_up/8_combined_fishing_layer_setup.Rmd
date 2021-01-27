@@ -5,6 +5,14 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(raster)
+library(tidyverse)
+library(sf)
+library(here)
+library(fasterize)
+library(stringr)
+library(janitor)
 ```
 
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
@@ -24,5 +32,41 @@ st_crs(mz_eez_sf)
 ## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
 mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 ```
+
+
+#### **STEP 2: Read in Artisanal and Industrial Fishing Rasters**
+```{r}
+art_fish_rast <- raster(here("set_up", "final_rasters", "costs", "cost_art_fish.tif"))
+
+industrial_stack <- raster(here("set_up", "final_rasters", "costs", "cost_industrial_stack.tif"))
+
+```
+
+#### **STEP 3: Rescale Industrial layer to be 0-1 (not 0-4)**
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
