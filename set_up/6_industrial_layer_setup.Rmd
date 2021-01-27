@@ -52,93 +52,145 @@ tuna <- raster(here("set_up", "final_rasters", "costs", "industrial", "Tuna_fish
 
 ### long-line
 long_line_rp <- projectRaster(long_line, mz_rast_id, res = 10000, method = 'ngb',
-                crs = crs(mz_rast_id)) %>%
-  mask(mz_eez_buffer_sf)
- 
+                crs = crs(mz_rast_id)) 
+
+long_line_rp[is.na(long_line_rp[])] <- 0.001
 plot(long_line_rp)
+
+long_line_rp <- mask(long_line_rp, mz_eez_buffer_sf)
+plot(long_line_rp)
+
+long_line_rp[long_line_rp == 0] <- 0.001
+
+plot(long_line_rp)
+
+long_line_rescaled <- log(long_line_rp+1)/ cellStats(log(long_line_rp+1), max)
+
+plot(longline_rescaled)
 
 ### gamba
 gamba_rp <- projectRaster(gamba, mz_rast_id, res = 10000, method = 'ngb',
-                crs = crs(mz_rast_id)) %>%
-   mask(mz_eez_buffer_sf)
+                crs = crs(mz_rast_id))
+
+gamba_rp[is.na(gamba_rp[])] <- 0.001
+plot(gamba_rp)
+
+gamba_rp <- mask(gamba_rp, mz_eez_buffer_sf)
+plot(gamba_rp)
+
+gamba_rp[gamba_rp == 0] <- 0.001
 
 plot(gamba_rp)
 
+gamba_rescaled <- log(gamba_rp+1)/ cellStats(log(gamba_rp+1), max)
+
+plot(gamba_rescaled)
+
+
 ### shrimp
 shrimp_rp <- projectRaster(shrimp, mz_rast_id, res = 10000, method = 'ngb',
-                crs = crs(mz_rast_id)) %>%
-   mask(mz_eez_buffer_sf)
+                crs = crs(mz_rast_id))
+
+shrimp_rp[is.na(shrimp_rp[])] <- 0.001
+plot(shrimp_rp)
+
+shrimp_rp  <- mask(shrimp_rp, mz_eez_buffer_sf)
+plot(shrimp_rp)
+
+shrimp_rp[shrimp_rp == 0] <- 0.001
 
 plot(shrimp_rp)
 
+shrimp_rescaled <- log(shrimp_rp+1)/ cellStats(log(shrimp_rp+1), max)
+
+plot(shrimp_rescaled)
+
 ### tuna
 tuna_rp <- projectRaster(tuna, mz_rast_id, res = 10000, method = 'ngb',
-                crs = crs(mz_rast_id)) %>%
-   mask(mz_eez_buffer_sf)
+                crs = crs(mz_rast_id)) 
+
+tuna_rp[is.na(tuna_rp[])] <- 0.001
+plot(tuna_rp)
+
+tuna_rp  <- mask(tuna_rp, mz_eez_buffer_sf)
+plot(tuna_rp)
+
+tuna_rp[tuna_rp == 0] <- 0.001
  
 plot(tuna_rp)
+
+tuna_rescaled <- log(tuna_rp+1)/ cellStats(log(tuna_rp+1), max)
+
+plot(tuna_rescaled)
 
 ```
 
 
 ```{r}
 #reassign each tif with values 0 or 1 
-long_line_final <- long_line_rp %>%
-  as.data.frame() %>%
-  mutate(pressure = case_when(fishing_line_kernel_density_noports > 0 ~ 1,
-                              fishing_line_kernel_density_noports == 0 ~ 0.001)) %>%
-  mutate(id = 1:n())
-
-
-gamba_final <- gamba_rp %>%
-  as.data.frame() %>%
-  mutate(pressure = case_when(Gamba_fishing_density_noports > 0 ~ 1,
-                             Gamba_fishing_density_noports == 0 ~ 0.001)) %>%
-  mutate(id = 1:n())
-
-shrimp_final <- shrimp_rp %>%
-  as.data.frame() %>%
-  mutate(pressure = case_when(Shrimp_fishing_density_noports > 0 ~ 1,
-                              Shrimp_fishing_density_noports == 0 ~ 0.001)) %>%
-  mutate(id = 1:n())
-
-tuna_final <- tuna_rp %>%
-  as.data.frame() %>%
-  mutate(pressure = case_when(Tuna_fishing_density_noports > 0 ~ 1,
-                              Tuna_fishing_density_noports == 0 ~ 0.001)) %>%
-  mutate(id = 1:n())
+# long_line_final <- long_line_rp %>%
+#   as.data.frame() %>%
+#   mutate(pressure = case_when(fishing_line_kernel_density_noports > 0 ~ 1,
+#                               fishing_line_kernel_density_noports == 0 ~ 0.001)) %>%
+#   mutate(id = 1:n())
+# 
+# 
+# gamba_final <- gamba_rp %>%
+#   as.data.frame() %>%
+#   mutate(pressure = case_when(Gamba_fishing_density_noports > 0 ~ 1,
+#                              Gamba_fishing_density_noports == 0 ~ 0.001)) %>%
+#   mutate(id = 1:n())
+# 
+# shrimp_final <- shrimp_rp %>%
+#   as.data.frame() %>%
+#   mutate(pressure = case_when(Shrimp_fishing_density_noports > 0 ~ 1,
+#                               Shrimp_fishing_density_noports == 0 ~ 0.001)) %>%
+#   mutate(id = 1:n())
+# 
+# tuna_final <- tuna_rp %>%
+#   as.data.frame() %>%
+#   mutate(pressure = case_when(Tuna_fishing_density_noports > 0 ~ 1,
+#                               Tuna_fishing_density_noports == 0 ~ 0.001)) %>%
+#   mutate(id = 1:n())
 
 
 #make them all rasters again, fun
 
 #long-line
-long_line_rast <- subs(mz_rast_id, long_line_final, by = 'id', which = 'pressure')
-plot(long_line_rast)
-
-writeRaster(long_line_rast, here('set_up/final_rasters/costs/long_line_rast.tif'), overwrite = TRUE)
-
-#gamba
-gamba_rast <- subs(mz_rast_id, gamba_final, by = 'id', which = 'pressure')
-plot(gamba_rast)
-
-writeRaster(gamba_rast, here('set_up/final_rasters/costs/gamba_rast.tif'), overwrite = TRUE)
-
-#shrimp
-shrimp_rast <- subs(mz_rast_id, shrimp_final, by = 'id', which = 'pressure')
-plot(shrimp_rast)
-
-writeRaster(shrimp_rast, here('set_up/final_rasters/costs/shrimp_rast.tif'), overwrite = TRUE)
-
-#tuna
-tuna_rast <- subs(mz_rast_id, tuna_final, by = 'id', which = 'pressure')
-plot(tuna_rast)
-
-writeRaster(tuna_rast, here('set_up/final_rasters/costs/tuna_rast.tif'), overwrite = TRUE)
+# long_line_rast <- subs(mz_rast_id, long_line_final, by = 'id', which = 'pressure')
+# plot(long_line_rast)
+# 
+# writeRaster(long_line_rast, here('set_up/final_rasters/costs/long_line_rast.tif'), overwrite = TRUE)
+# 
+# #gamba
+# gamba_rast <- subs(mz_rast_id, gamba_final, by = 'id', which = 'pressure')
+# plot(gamba_rast)
+# 
+# writeRaster(gamba_rast, here('set_up/final_rasters/costs/gamba_rast.tif'), overwrite = TRUE)
+# 
+# #shrimp
+# shrimp_rast <- subs(mz_rast_id, shrimp_final, by = 'id', which = 'pressure')
+# plot(shrimp_rast)
+# 
+# writeRaster(shrimp_rast, here('set_up/final_rasters/costs/shrimp_rast.tif'), overwrite = TRUE)
+# 
+# #tuna
+# tuna_rast <- subs(mz_rast_id, tuna_final, by = 'id', which = 'pressure')
+# plot(tuna_rast)
+# 
+# writeRaster(tuna_rast, here('set_up/final_rasters/costs/tuna_rast.tif'), overwrite = TRUE)
 
 
 #create raster stack
-industrial_stack <-  stack(long_line_rast, gamba_rast, shrimp_rast, tuna_rast, mz_rast_id)
+industrial_stack <-  stack(long_line_rescaled, gamba_rescaled, shrimp_rescaled, tuna_rescaled)
 plot(industrial_stack)
+
+industrial_stack_rescaled <- log(industrial_stack+1)/ cellStats(log(industrial_stack+1), max)
+
+plot(industrial_stack_rescaled)
+
+industrial_stack_rescaled_df <- industrial_stack_rescaled %>% as.data.frame()
+
 
 writeRaster(industrial_stack, here('set_up/final_rasters/costs/cost_industrial_stack.tif'), overwrite = TRUE)
 ```
