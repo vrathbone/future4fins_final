@@ -50,11 +50,15 @@ art_fish_df <- as.data.frame(art_fish)
 plot(art_fish)
  
 ## Priortizr does not like cost values of NA or 0 so changed both to 0.1
-art_fish[art_fish <= 0] <- 0.1
-art_test <- as.data.frame(art_fish)
+art_fish[is.na(art_fish[])] <- 0.001
+plot(art_fish)
 
-#art_fish_rast <- subs(pu_2, art_fish_test, by = 'id', which = 'fish_press')
+art_fish <- mask(art_fish, mz_eez_buffer_sf)
+plot(art_fish)
 
+art_fish[art_fish == 0] <- 0.001
+
+art_fish_test <- as.data.frame(art_fish)
 plot(art_fish)
 
 ## Since we changed all NAs values to 0.1 we need to mask this to MZ eez since we are now picking up terrestrial areas 

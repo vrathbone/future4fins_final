@@ -143,7 +143,6 @@ species_name <- c("Alopias pelagicus",
                  "Mobula birostris",
                  "Mobula kuhlii",
                  "Mobula mobular",
-                 "Mobula thurstoni",
                  "Pristis pristis",
                  "Pristis zijsron",
                  "Rostroraja alba",
@@ -165,17 +164,18 @@ for (i in seq_along(species_name)) {
 #### **STEP 7: Creating Species Stack**
 ```{r}
 ### create file path to read in all 30 species tifs in 
-species_path <- 'G:/group_project/future4fins/future4fins/set_up/final_rasters/conservation_features/iucn_species'
+species_path <- here("set_up", "final_rasters", "conservation_features", "iucn_species")
 species_files <- list.files(species_path, full.names = TRUE)
 
 ### stack them 
 species_stack <- stack(species_files)
 
-### plot to see how they look
+### plot to see how they look and make a data frame to double check
 plot(species_stack)
+species_stack_df <- as.data.frame(species_stack)
 
 ### write raster
-writeRaster(species_stack, here('set_up/final_rasters/conservation_features/species_stack.tif'), overwrite = TRUE)
+writeRaster(species_stack, here('set_up/final_rasters/conservation_features/species_stack.tif'), options="INTERLEAVE=BAND",  overwrite = TRUE)
 ```
 
 Citations:

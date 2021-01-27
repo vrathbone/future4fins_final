@@ -31,26 +31,7 @@ pu <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif
 
 ### plot to make sure it looks okay
 plot(pu)
-### looks good, but need a mask so must mask it
 
-### to mask the raster:
-## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
-mz_eez_path <- 'G:/group_project/data/mz_eez'
-mz_shape <- list.files(mz_eez_path, full.names = TRUE) 
-
-## Read in shapefile as simple feature 
-mz_eez_sf <- sf::read_sf(mz_shape[6])
-
-## check coordinate system
-st_crs(mz_eez_sf)
-
-## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
-mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
-
-pu <- mask(pu, mz_eez_buffer_sf)
-
-### now see what it looks like with a mask
-plot(pu)
 ```
 
 #### Cost Layer
@@ -78,21 +59,14 @@ writeRaster(cost_area, here('set_up/final_rasters/area_cost.tif'), overwrite = T
 #### Conservation Features
 This includes all species distributions and habitat rasters
 
-
 **Creating Species Stack**
 ```{r}
-### create file path to read in all 30 species tifs in
-species_path <- 'G:/group_project/future4fins/future4fins/set_up/final_rasters/conservation_features/iucn_species'
-species_files <- list.files(species_path, full.names = TRUE)
+### pull in species stack that we created in set-up step 3
 
-### stack them
-species_stack <- stack(species_files)
+species <- brick(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
 
-### plot to see how they look
-plot(species_stack)
+plot(species)
 
-### write raster
-# writeRaster(species_stack, here('set_up/final_rasters/species_stack.tif'), overwrite = TRUE)
 ```
 
 Creating Habitat Stack

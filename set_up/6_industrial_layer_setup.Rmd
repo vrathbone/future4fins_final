@@ -86,26 +86,26 @@ plot(tuna_rp)
 long_line_final <- long_line_rp %>%
   as.data.frame() %>%
   mutate(pressure = case_when(fishing_line_kernel_density_noports > 0 ~ 1,
-                              fishing_line_kernel_density_noports == 0 ~ 0.1)) %>%
+                              fishing_line_kernel_density_noports == 0 ~ 0.001)) %>%
   mutate(id = 1:n())
 
 
 gamba_final <- gamba_rp %>%
   as.data.frame() %>%
   mutate(pressure = case_when(Gamba_fishing_density_noports > 0 ~ 1,
-                             Gamba_fishing_density_noports == 0 ~ 0.1)) %>%
+                             Gamba_fishing_density_noports == 0 ~ 0.001)) %>%
   mutate(id = 1:n())
 
 shrimp_final <- shrimp_rp %>%
   as.data.frame() %>%
   mutate(pressure = case_when(Shrimp_fishing_density_noports > 0 ~ 1,
-                              Shrimp_fishing_density_noports == 0 ~ 0.1)) %>%
+                              Shrimp_fishing_density_noports == 0 ~ 0.001)) %>%
   mutate(id = 1:n())
 
 tuna_final <- tuna_rp %>%
   as.data.frame() %>%
   mutate(pressure = case_when(Tuna_fishing_density_noports > 0 ~ 1,
-                              Tuna_fishing_density_noports == 0 ~ 0.1)) %>%
+                              Tuna_fishing_density_noports == 0 ~ 0.001)) %>%
   mutate(id = 1:n())
 
 

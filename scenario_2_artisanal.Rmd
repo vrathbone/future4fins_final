@@ -27,40 +27,13 @@ The objective of this scenario was to protect important areas for sharks and ray
 #### Planning Unit
 ```{r}
 # ### reading in the baseline MZ EEZ raster (with cell ids) 
-# pu_2 <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
+pu_2 <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
 # 
 # ### plot to make sure it looks okay
-# plot(pu_2)
+plot(pu_2)
 
 ```
 
-```{r}
-### reading in the baseline MZ EEZ raster (with cell ids) 
-pu <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
-
-### plot to make sure it looks okay
-plot(pu)
-### looks good, but need a mask so must mask it
-
-### to mask the raster:
-## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
-mz_eez_path <- 'G:/group_project/data/mz_eez'
-mz_shape <- list.files(mz_eez_path, full.names = TRUE) 
-
-## Read in shapefile as simple feature 
-mz_eez_sf <- sf::read_sf(mz_shape[6])
-
-## check coordinate system
-st_crs(mz_eez_sf)
-
-## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
-mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
-
-pu <- mask(pu, mz_eez_buffer_sf)
-
-### now see what it looks like with a mask
-plot(pu)
-```
 
 #### Cost Layer
 Other scenarios will require more prep to create cost layer, so they will be found in separate Rmarkdowns. Since this scenario is so short, we created it in this Rmarkdown.
