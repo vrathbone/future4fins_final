@@ -1,0 +1,149 @@
+---
+title: "Industrial input file"
+author: "Vanessa Rathbone"
+date: "1/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#load packages
+library(raster)
+library(tidyverse)
+library(sf)
+library(here)
+library(fasterize)
+library(stringr)
+library(janitor)
+library(fasterize)
+```
+
+#### **STEP 1: Read in Mozambique EEZ and Shapefile**
+```{r}
+## read in MZ EEZ tif
+mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"))
+
+## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
+mz_eez_path <- 'G:/group_project/data/mz_eez'
+mz_shape <- list.files(mz_eez_path, full.names = TRUE) 
+
+mz_eez_sf <- sf::read_sf(mz_shape[6])
+
+## check coordinate system
+st_crs(mz_eez_sf)
+
+## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
+mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
+```
+
+```{r}
+#read in tifs as rasters
+
+long_line <- raster(here("set_up", "final_rasters", "costs", "industrial", "fishing_line_kernel_density_noports.tif"))
+
+gamba <- raster(here("set_up", "final_rasters", "costs", "industrial", "Gamba_fishing_density_noports.tif"))
+
+shrimp <- raster(here("set_up", "final_rasters", "costs", "industrial", "Shrimp_fishing_density_noports.tif"))
+
+tuna <- raster(here("set_up", "final_rasters", "costs", "industrial", "Tuna_fishing_density_noports.tif"))
+
+#reproject rasters to be in correct extent and crs
+
+#long-line
+long_line_rp <- projectRaster(long_line, mz_rast_id, res = 10000, method = 'ngb',
+                crs = crs(mz_rast_id)) %>%
+   mask(mz_eez_buffer_sf)
+ 
+
+plot(long_line_rp)
+
+#gamba
+
+gamba_rp <- projectRaster(gamba, mz_rast_id, res = 10000, method = 'ngb',
+                crs = crs(mz_rast_id)) %>%
+   mask(mz_eez_buffer_sf)
+ 
+
+plot(gamba_rp)
+
+#shrimp
+
+shrimp_rp <- projectRaster(shrimp, mz_rast_id, res = 10000, method = 'ngb',
+                crs = crs(mz_rast_id)) %>%
+   mask(mz_eez_buffer_sf)
+ 
+
+plot(shrimp_rp)
+
+#tuna
+
+tuna_rp <- projectRaster(tuna, mz_rast_id, res = 10000, method = 'ngb',
+                crs = crs(mz_rast_id)) %>%
+   mask(mz_eez_buffer_sf)
+ 
+
+plot(tuna_rp)
+
+```
+
+
+```{r}
+#reassign each tif with values 0 or 1 
+
+long_line_final <- long_line_rp %>%
+  as.data.frame() %>%
+  mutate(pressure = case_when(fishing_line_kernel_density_noports > 0 ~ 1,
+                              fishing_line_kernel_density_noports == 0 ~ 0)) %>%
+  mutate(id = 1:n())
+
+
+gamba_final <- gamba_rp %>%
+  as.data.frame() %>%
+  mutate(pressure = case_when(Gamba_fishing_density_noports > 0 ~ 1,
+                             Gamba_fishing_density_noports == 0 ~ 0)) %>%
+  mutate(id = 1:n())
+
+shrimp_final <- shrimp_rp %>%
+  as.data.frame() %>%
+  mutate(pressure = case_when(Shrimp_fishing_density_noports > 0 ~ 1,
+                              Shrimp_fishing_density_noports == 0 ~ 0)) %>%
+  mutate(id = 1:n())
+
+tuna_final <- tuna_rp %>%
+  as.data.frame() %>%
+  mutate(pressure = case_when(Tuna_fishing_density_noports > 0 ~ 1,
+                              Tuna_fishing_density_noports == 0 ~ 0)) %>%
+  mutate(id = 1:n())
+
+
+#make them all rasters again, fun
+
+#long-line
+long_line_rast <- subs(mz_rast_id, long_line_final, by = 'id', which = 'pressure')
+
+plot(long_line_rast)
+
+#gamba
+gamba_rast <- subs(mz_rast_id, gamba_final, by = 'id', which = 'pressure')
+
+plot(gamba_rast)
+
+#shrimp
+shrimp_rast <- subs(mz_rast_id, shrimp_final, by = 'id', which = 'pressure')
+
+plot(shrimp_rast)
+
+#tuna
+tuna_rast <- subs(mz_rast_id, tuna_final, by = 'id', which = 'pressure')
+
+plot(tuna_rast)
+
+#create raster stack
+industrial_stack = stack(long_line_rast, gamba_rast, shrimp_rast, tuna_rast, mz_rast_id)
+
+plot(industrial_stack)
+
+
+```
+
