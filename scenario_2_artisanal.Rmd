@@ -14,6 +14,7 @@ library(fasterize)
 library(stringr)
 library(janitor)
 library(prioritizr)
+library(rgdal)
 library(gurobi)
 
 ```
@@ -24,25 +25,42 @@ The objective of this scenario was to protect important areas for sharks and ray
 ### STEP 1: Assign planning units, cost layer, and conservation feature
 
 #### Planning Unit
+```{r}
+# ### reading in the baseline MZ EEZ raster (with cell ids) 
+# pu_2 <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
+# 
+# ### plot to make sure it looks okay
+# plot(pu_2)
 
 ```
 
-## Scenario 1 - Baseline
-The objective of this scenario was to protect important areas for sharks and rays based on their distribution from IUCN and location of suitable habitats using a uniform cost for all planning units. For this run, we used area as the cost, set targets of 20% for all conservation features, locked in planning units that included existing MPAs, and set a boundary penalty to zero. 
-
-### STEP 1: Assign planning units, cost layer, and conservation feature
-
-#### Planning Unit
 ```{r}
 ### reading in the baseline MZ EEZ raster (with cell ids) 
-pu_2 <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
+pu <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
 
 ### plot to make sure it looks okay
-plot(pu_2)
+plot(pu)
+### looks good, but need a mask so must mask it
 
+### to mask the raster:
+## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
+mz_eez_path <- 'G:/group_project/data/mz_eez'
+mz_shape <- list.files(mz_eez_path, full.names = TRUE) 
+
+## Read in shapefile as simple feature 
+mz_eez_sf <- sf::read_sf(mz_shape[6])
+
+## check coordinate system
+st_crs(mz_eez_sf)
+
+## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
+mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
+
+pu <- mask(pu, mz_eez_buffer_sf)
+
+### now see what it looks like with a mask
+plot(pu)
 ```
-
-
 
 #### Cost Layer
 Other scenarios will require more prep to create cost layer, so they will be found in separate Rmarkdowns. Since this scenario is so short, we created it in this Rmarkdown.
@@ -75,4 +93,51 @@ plot(cost_art_fish)
 writeRaster(cost_art_fish, here('set_up/final_rasters/cost_art_fish.tif'), overwrite = TRUE)
 
 ```
+
+#### Conservation Features
+This includes all species distributions and habitat rasters
+
+```{r}
+# List of conservation features that will have been loaded into the global environment in other scenarios (ie scenario_1_area)
+
+#species_stack
+
+#habitat_stack
+
+##combine into 
+#features_stack
+```
+
+### Additional Files (Locked-in & Locked-out)
+```{r}
+# List of additional files that will have been loaded into the global environment in other scenarios (ie scenario_1_area)
+
+#exist_mpas
+
+#oil_rast
+
+```
+
+## Let's Run Some Artisanal Fishing Scenarios!
+
+## SCENARIO 1: Baseline - 20% target, Boundary Penalty = 0,  
+```{r}
+### OBJECTIVE: Minimize artisanal fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_artisanal <- problem(cost_art_fish, features = features_stack) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 10)
+
+## Solve problem
+sprob_artisanal <- solve(prob_artisanal)
+## Plot the solution to see what it looks like
+plot(sprob_artisanal,  main = c("Artisanal- 20% Targets"))
+
+
+```
+
+
 

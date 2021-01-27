@@ -150,7 +150,7 @@ prob_area <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120)
+  add_gurobi_solver(gap = 0.01, time_limit = 2)
 
 ## Solve problem
 sprob_area <- solve(prob_area)
