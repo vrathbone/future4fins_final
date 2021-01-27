@@ -36,18 +36,45 @@ mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 
 #### **STEP 2: Read in Artisanal and Industrial Fishing Rasters**
 ```{r}
+### read in artisanal fishing raster
 art_fish_rast <- raster(here("set_up", "final_rasters", "costs", "cost_art_fish.tif"))
 
-industrial_stack <- raster(here("set_up", "final_rasters", "costs", "cost_industrial_stack.tif"))
+### read in all industrial fishing rasters
+long_line_rast <- raster(here("set_up", "final_rasters", "costs", "long_line_rast.tif"))
+gamba_rast <- raster(here("set_up", "final_rasters", "costs", "gamba_rast.tif"))
+shrimp_rast <- raster(here("set_up", "final_rasters", "costs", "shrimp_rast.tif"))
+tuna_rast <- raster(here("set_up", "final_rasters", "costs", "tuna_rast.tif"))
+
+### create a raster stack of all industrial
+industrial_stack <-  stack(long_line_rast, gamba_rast, shrimp_rast, tuna_rast, mz_rast_id)
+
+### see what it looks like!
+plot(industrial_stack)
 
 ```
 
 #### **STEP 3: Rescale Industrial layer to be 0-1 (not 0-4)**
 ```{r}
+### rescale the stack from 0-4 to 0-1
+industrial_rescaled <- log(industrial_stack+1)/ cellStats(log(industrial_stack+1), max)
+
+### plot it!
+plot(industrial_rescaled)
+
+### check it!
+industrial_df <- industrial_rescaled  %>%
+  as.data.frame()
 
 ```
 
+#### **STEP 4: Create raster stack of all fishing**
+```{r}
+### create raster stack
+combined_fishing_stack <- stack(industrial_rescaled, art_fish_rast)
 
+### plot it!
+plot(combined_fishing_stack)
+```
 
 
 
