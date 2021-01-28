@@ -72,7 +72,7 @@ aca_coral_sf <- aca_sf %>%
 
 ## Make a raster of the coral simple feature using mz_rast_100 - the raster we created at a smaller resolution to set extent and mask to the mz_eez_buffer_sf
 aca_coral_raster <- fasterize::fasterize(aca_coral_sf, mz_rast_100)%>%
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 ## plot to make sure it looks good
 plot(aca_coral_raster) # look closely it's there!
@@ -85,7 +85,7 @@ aca_coral_raster_agg <- raster::aggregate(aca_coral_raster, fact=100, fun=sum, n
 aca_coral_aggregate_per <- aca_coral_raster_agg/10000
 
 ## mask to the MZ EEZ
-aca_coral_aggregate_per <- mask(aca_coral_aggregate_per, mz_eez_buffer_sf)
+aca_coral_aggregate_per <- mask(aca_coral_aggregate_per, mz_eez_sf)
 
 ## Lets plot to see what it looks like
 plot(aca_coral_aggregate_per)
@@ -104,7 +104,7 @@ aca_seagrass_sf <- aca_sf %>%
 
 ## Let's create a rsater using the mz_rast with resolution of 10000 and mask to the MZ EEZ
 aca_seagrass_raster <- fasterize::fasterize(aca_seagrass_sf, mz_rast_100) %>% 
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 ## plot to make sure it looks good
 plot(aca_seagrass_raster)
@@ -116,7 +116,7 @@ writeRaster(aca_seagrass_raster, here('set_up/final_rasters/conservation_feature
 aca_seagrass_raster_agg <- raster::aggregate(aca_seagrass_raster, fact=100, fun=sum, na.rm = TRUE)
 aca_seagrass_aggregate_per <- aca_seagrass_raster_agg/10000
 
-aca_seagrass_aggregate_per <- mask(aca_seagrass_aggregate_per, mz_eez_buffer_sf)
+aca_seagrass_aggregate_per <- mask(aca_seagrass_aggregate_per, mz_eez_sf)
 
 plot(aca_seagrass_aggregate_per)
 
@@ -147,7 +147,7 @@ mangrove_df <- mangrove_sf %>% as.data.frame() %>% select(-geometry)
 
 ## Mangroves also has finer resolution that we want to be sure we capture so lets make a raster of the mangove simple feature using mz_rast_100 - the raster we created at a smaller resolution to set extent and mask to the mz_eez
 mangrove_raster <- fasterize::fasterize(mangrove_sf, mz_rast_100)%>%
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 ## plot to make sure it looks good
 plot(mangrove_raster)
@@ -156,7 +156,7 @@ plot(mangrove_raster)
 mangrove_agg <- raster::aggregate(mangrove_raster, fact=100, fun=sum, na.rm=TRUE)
 mangrove_agg_percent <- mangrove_agg/10000
 
-mangrove_rast <- mask(mangrove_agg_percent, mz_eez_buffer_sf)
+mangrove_rast <- mask(mangrove_agg_percent, mz_eez_sf)
 
 ## Lets plot to see what it looks like
 plot(mangrove_rast)
@@ -181,7 +181,7 @@ st_crs(seamount_sf)
 
 ## Let's create a rsater using the mz_rast with resolution of 10000 and mask tot the MZ EEZ
 seamount_raster <- fasterize::fasterize(seamount_sf, mz_rast_id)%>%
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 ## Plot to see what it looks like
 plot(seamount_raster)
@@ -204,7 +204,7 @@ st_crs(knolls_sf)
 
 ## Let's create a rsater using the mz_rast with resolution of 10000 and mask tot the MZ EEZ
 knolls_raster <- fasterize::fasterize(knolls_sf, mz_rast_id)%>%
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 ## Plot to see what it looks like
 plot(knolls_raster)

@@ -62,7 +62,7 @@ mz_rast_id_df <- rasterToPoints(mz_rast_id) %>% as.data.frame()
 plot(mz_rast_id)
 
 ## Mask it to only include the EEZ
-mz_rast_id <- mask(mz_rast_id, mz_eez_buffer_sf)
+mz_rast_id <- mask(mz_rast_id, mz_eez_sf)
 plot(mz_rast_id)
 
 ## Let's save this cell id raster as tif file - hashtagged this out for now since the tif is too big
@@ -99,7 +99,7 @@ mz_eez_rast_1000 <- raster::raster(x=extent(mz_rast_id), crs=crs(mz_eez_sf), res
 values(mz_eez_rast_1000) <- 1:ncell(mz_eez_rast_1000)
 
 ## Mask to Moz EEZ
-mz_eez_rast_1000 <- mask(mz_eez_rast_1000, mz_eez_buffer_sf)
+mz_eez_rast_1000 <- mask(mz_eez_rast_1000, mz_eez_sf)
 
 ## Plot and create data frame to validate it looks good
 plot(mz_eez_rast_1000)

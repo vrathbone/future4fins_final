@@ -21,6 +21,7 @@ library(fasterize)
 ```{r}
 ## read in MZ EEZ tif
 mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"))
+plot(mz_rast_id)
 
 ## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
 mz_eez_path <- 'G:/group_project/data/mz_eez'
@@ -32,7 +33,7 @@ mz_eez_sf <- sf::read_sf(mz_shape[6])
 st_crs(mz_eez_sf)
 
 ## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
-mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
+#mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 ```
 
 
@@ -63,9 +64,18 @@ thresher_shark <- iucn_sf %>%
 st_crs(thresher_shark)
 
 ### create a raster 
-thresher_shark_rast <- fasterize::fasterize(thresher_shark, mz_rast_id)
+thresher_shark_rast <- fasterize::fasterize(thresher_shark, mz_rast_id) %>% 
+  mask(mz_eez_sf)
 
 ### plot to see how it looks
+plot(thresher_shark_rast)
+
+### made all NA = 0 (not sure if this makes a difference)
+thresher_shark_rast[is.na(thresher_shark_rast[])] <- 0
+plot(thresher_shark_rast)
+
+### masked it to make all values outside the eez = NA
+thresher_shark_rast <- mask(thresher_shark_rast, mz_eez_sf)
 plot(thresher_shark_rast)
 
 ### create dataframe that only contains species and changes to correct crs
@@ -78,7 +88,7 @@ st_crs(dusky_shark)
 
 ### create a raster 
 dusky_shark_rast <- fasterize::fasterize(dusky_shark, mz_rast_id) %>% 
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 ### plot to see how it looks
 plot(dusky_shark_rast)
@@ -93,7 +103,7 @@ st_crs(shark)
 
 ### create a raster 
 shark_rast <- fasterize::fasterize(shark, mz_rast_id) %>% 
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 ### plot to see how it looks
 plot(shark_rast)
@@ -111,7 +121,7 @@ create_rast <- function(iucn_sf, species_name){
   st_transform(., crs = st_crs(mz_eez_sf))
 
 species_rast <- fasterize::fasterize(species_df, mz_rast_id) %>% 
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 writeRaster(species_rast, filename = outfile, overwrite = TRUE)
 
@@ -168,7 +178,7 @@ p_brevicaudatum_sf <- sf::read_sf(p_brevicaudatum_shape[7]) %>%
     st_transform(., crs = st_crs(mz_eez_sf))
 
 p_brevicaudatum_rast <- fasterize::fasterize(p_brevicaudatum_sf, mz_rast_id) %>% 
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 plot(p_brevicaudatum_rast)
 
@@ -182,7 +192,7 @@ r_australiae_sf <- sf::read_sf(r_ausrtraliae_shape[7]) %>%
     st_transform(., crs = st_crs(mz_eez_sf))
 
 r_australiae_rast <- fasterize::fasterize(r_australiae_sf, mz_rast_id) %>% 
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 plot(r_australiae_rast)
 
@@ -196,7 +206,7 @@ r_djiddensis_sf <- sf::read_sf(r_djiddensis_shape[7]) %>%
     st_transform(., crs = st_crs(mz_eez_sf))
 
 r_djiddensis_rast <- fasterize::fasterize(r_djiddensis_sf, mz_rast_id) %>% 
-  mask(mz_eez_buffer_sf)
+  mask(mz_eez_sf)
 
 plot(r_djiddensis_rast)
 
@@ -205,7 +215,7 @@ writeRaster(r_djiddensis_rast, here('set_up/final_rasters/conservation_features/
 ```
 
 
-#### **STEP 8: Creating Species Stack**
+#### **STEP 8: Creating Species Stack** --must clear environment to run this chuck...
 ```{r}
 ### create file path to read in all 30 species tifs in 
 species_path <- here("set_up", "final_rasters", "conservation_features", "iucn_species")
