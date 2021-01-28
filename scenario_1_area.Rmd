@@ -63,45 +63,17 @@ This includes all species distributions and habitat rasters
 ```{r}
 ### pull in species stack that we created in set-up step 3
 
-species <- brick(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
+species_stack <- brick(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
 
-plot(species)
+plot(species_stack)
 
 ```
 
-Creating Habitat Stack
-```{r}
-### reading in all habitat rasters
-aca_coral_rast <- raster(here("set_up", "final_rasters", "conservation_features", "coral", "aca_coral_agg.tif"))
-knolls_rast <- raster(here("set_up", "final_rasters", "conservation_features", "knolls", "knolls.tif"))
-mangrove_rast <- raster(here("set_up", "final_rasters", "conservation_features", "mangrove", "mangrove.tif"))
-aca_seagrass_rast <- raster(here("set_up", "final_rasters", "conservation_features", "seagrass", "aca_seagrass_agg.tif"))
-seamount_rast <- raster(here("set_up", "final_rasters", "conservation_features", "seamounts", "seamount.tif"))
-mz_rast_id <- raster(here("set_up", "final_rasters", "mz_eez_templates","mz_rast_id.tif"))
-habitat_stack <- stack(aca_coral_rast, knolls_rast, mangrove_rast, aca_seagrass_rast, seamount_rast)
-plot(habitat_stack)
-### write raster
-writeRaster(habitat_stack, here('set_up/final_rasters/habitat_stack.tif'), options="INTERLEAVE=BAND", overwrite = TRUE)
-```
+
 
 Creating Final Conservation Feature 
 ```{r}
-### read in species raster stack created in the species rmd
-#species_stack <-  raster(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
 
-### read in critical habitat stack created in the conservation features rmd
-#habitat_stack <-  raster(here("set_up", "final_rasters", "conservation_features", "habitat_stack.tif"))
-
-### stack all species and habitat
-features_stack <- stack(habitat_stack, species_stack)
-
-plot(features_stack)
-
-### change into a dataframe to check it
-features_df <- as.data.frame(features_stack)
-
-### write raster
-writeRaster(features_stack, here('set_up/final_rasters/all_features_stack.tif'),options="INTERLEAVE=BAND", overwrite = TRUE)
 ```
 
 
@@ -110,8 +82,6 @@ writeRaster(features_stack, here('set_up/final_rasters/all_features_stack.tif'),
 ### read in existing mpas raster
 exist_mpas <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
 
-### read in oil rigs rasters
-oil_rast <- raster(here("set_up", "final_rasters", "planning_unit", "oil_rig.tif"))
 ```
 
 
@@ -124,7 +94,7 @@ prob_area <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 2)
+  add_gurobi_solver(gap = 0.01, time_limit = 120)
 
 ## Solve problem
 sprob_area <- solve(prob_area)

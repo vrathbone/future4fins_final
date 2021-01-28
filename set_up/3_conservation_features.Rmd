@@ -217,17 +217,36 @@ writeRaster(knolls_raster, here('set_up/final_rasters/conservation_features/knol
 
 ```{r}
 ## Create a features stack from all five critical habitats created in the previous steps
-features_stack <- stack(aca_coral_raster_agg, mangrove_rast, aca_seagrass_raster_agg, seamount_raster, knolls_raster)
+habitat_stack <- stack(aca_coral_raster_agg, mangrove_rast, aca_seagrass_raster_agg, seamount_raster, knolls_raster)
 
 ## Plot to see what it looks like
-plot(features_stack)
+plot(habitat_stack)
 
-plot(features_stack, main = paste("Feature", seq_len(nlayers(features_stack))),
+plot(habitat_stack, main = paste("Feature", seq_len(nlayers(features_stack))),
      nr = 2, box = FALSE, axes = FALSE)
 
 ## Looks good, let's save as a multilayer feature tif
-writeRaster(features_stack, filename=here("set_up","final_rasters","conservation_features", "habitat_stack.tif"), options="INTERLEAVE=BAND", overwrite=TRUE)
+writeRaster(habitat_stack, filename=here("set_up","final_rasters","conservation_features", "habitat_stack.tif"), options="INTERLEAVE=BAND", overwrite=TRUE)
 ```
+
+### **STEP 4: Combine habitat raster stack and species raster stack to create stack of all conservation features**
+```{r}
+## pull in species stack we created in step 2
+species_stack <- brick(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
+
+### stack all species and habitat
+features_stack <- stack(habitat_stack, species_stack)
+
+plot(features_stack)
+
+### change into a dataframe to check it
+features_df <- as.data.frame(features_stack)
+
+### write raster
+writeRaster(features_stack, here('set_up/final_rasters/all_features_stack.tif'),options="INTERLEAVE=BAND", overwrite = TRUE)
+```
+
+
 
 Citations:
  - 

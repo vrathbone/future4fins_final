@@ -129,7 +129,6 @@ species_name <- c("Alopias pelagicus",
                  "Carcharhinus amblyrhynchos",
                  "Carcharhinus longimanus",
                  "Carcharhinus obscurus",
-                 "Pseudoginglymostoma brevicaudatum",
                  "Carcharodon carcharias",
                  "Isurus oxyrinchus",
                  "Isurus paucus",
@@ -147,8 +146,6 @@ species_name <- c("Alopias pelagicus",
                  "Pristis zijsron",
                  "Rostroraja alba",
                  "Rhina ancylostoma",
-                 "Rhynchobatus australiae",
-                 "Rhynchobatus djiddensis",
                  "Acroteriobatus leucospilus")
                  
 ```
@@ -161,13 +158,60 @@ for (i in seq_along(species_name)) {
 }
 ```
 
-#### **STEP 7: Creating Species Stack**
+#### **STEP 7: Pull in the three IUCN distributions that were refined with WCS experts**
+```{r}
+### read in the range map for Pseudoginglymostoma brevicaudatum:
+p_brevicaudatum <-here("set_up", "raw_data", "pseudoginglymostoma_brevicaudatum")
+p_brevicaudatum_shape <- list.files(p_brevicaudatum, full.names = TRUE) 
+
+p_brevicaudatum_sf <- sf::read_sf(p_brevicaudatum_shape[7]) %>% 
+    st_transform(., crs = st_crs(mz_eez_sf))
+
+p_brevicaudatum_rast <- fasterize::fasterize(p_brevicaudatum_sf, mz_rast_id) %>% 
+  mask(mz_eez_buffer_sf)
+
+plot(p_brevicaudatum_rast)
+
+writeRaster(p_brevicaudatum_rast, here('set_up/final_rasters/conservation_features/iucn_species/species_Pseudoginglymostoma_brevicaudatum_wcs.tif'), overwrite = TRUE)
+
+### read in the range map for Rhynchobatus australiae:
+r_ausrtraliae <-here("set_up", "raw_data", "rhynchobatus_australiae")
+r_ausrtraliae_shape <- list.files(r_ausrtraliae, full.names = TRUE) 
+
+r_australiae_sf <- sf::read_sf(r_ausrtraliae_shape[7]) %>% 
+    st_transform(., crs = st_crs(mz_eez_sf))
+
+r_australiae_rast <- fasterize::fasterize(r_australiae_sf, mz_rast_id) %>% 
+  mask(mz_eez_buffer_sf)
+
+plot(r_australiae_rast)
+
+writeRaster(r_australiae_rast, here('set_up/final_rasters/conservation_features/iucn_species/species_Rhynchobatus_australiae_wcs.tif'), overwrite = TRUE)
+
+### read in the range map for Rhynchobatus djiddensis:
+r_djiddensis <-here("set_up", "raw_data", "rhynchobatus_djiddensis")
+r_djiddensis_shape <- list.files(r_djiddensis, full.names = TRUE) 
+
+r_djiddensis_sf <- sf::read_sf(r_djiddensis_shape[7]) %>% 
+    st_transform(., crs = st_crs(mz_eez_sf))
+
+r_djiddensis_rast <- fasterize::fasterize(r_djiddensis_sf, mz_rast_id) %>% 
+  mask(mz_eez_buffer_sf)
+
+plot(r_djiddensis_rast)
+
+writeRaster(r_djiddensis_rast, here('set_up/final_rasters/conservation_features/iucn_species/species_Rhynchobatus_djiddensis_wcs.tif'), overwrite = TRUE)
+
+```
+
+
+#### **STEP 8: Creating Species Stack**
 ```{r}
 ### create file path to read in all 30 species tifs in 
 species_path <- here("set_up", "final_rasters", "conservation_features", "iucn_species")
 species_files <- list.files(species_path, full.names = TRUE)
 
-### stack them 
+### stack them (this includes the three that we manually created and saved in the same IUCN folder)
 species_stack <- stack(species_files)
 
 ### plot to see how they look and make a data frame to double check
