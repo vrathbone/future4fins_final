@@ -222,7 +222,7 @@ habitat_stack <- stack(aca_coral_raster_agg, mangrove_rast, aca_seagrass_raster_
 ## Plot to see what it looks like
 plot(habitat_stack)
 
-plot(habitat_stack, main = paste("Feature", seq_len(nlayers(features_stack))),
+plot(habitat_stack, main = paste("Feature", seq_len(nlayers(habitat_stack))),
      nr = 2, box = FALSE, axes = FALSE)
 
 ## Looks good, let's save as a multilayer feature tif
@@ -233,6 +233,8 @@ writeRaster(habitat_stack, filename=here("set_up","final_rasters","conservation_
 ```{r}
 ## pull in species stack we created in step 2
 species_stack <- brick(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
+
+plot(species_stack)
 
 ### stack all species and habitat
 features_stack <- stack(habitat_stack, species_stack)

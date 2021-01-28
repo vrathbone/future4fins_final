@@ -53,19 +53,18 @@ plot(art_fish)
 art_fish[is.na(art_fish[])] <- 0.001
 plot(art_fish)
 
+## since we changed all NAs to 0.001 we need to again mask it to change values on land to NA
 art_fish <- mask(art_fish, mz_eez_buffer_sf)
 plot(art_fish)
 
 art_fish[art_fish == 0] <- 0.001
-
-art_fish_test <- as.data.frame(art_fish)
 plot(art_fish)
 
-## Since we changed all NAs values to 0.1 we need to mask this to MZ eez since we are now picking up terrestrial areas 
-cost_art_fish <- mask(art_fish, mz_rast_id)
-plot(cost_art_fish)
+## now lets rescale from 0 to 1
+art_fish_rescaled <- log(art_fish+1)/ cellStats(log(art_fish+1), max)
+plot(art_fish_rescaled)
 
 ## Looks good lets save as a tif
-writeRaster(cost_art_fish, here('set_up/final_rasters/costs/cost_art_fish.tif'), overwrite = TRUE)
+writeRaster(art_fish_rescaled, here('set_up/final_rasters/costs/cost_art_fish.tif'), overwrite = TRUE)
 ```
 

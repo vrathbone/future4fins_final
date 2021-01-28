@@ -39,55 +39,29 @@ plot(pu_2)
 Other scenarios will require more prep to create cost layer, so they will be found in separate Rmarkdowns. Since this scenario is so short, we created it in this Rmarkdown.
 ```{r}
 ### pull in the artisanal fishing pressure tif file from costs folder in repo
-art_fish_rast <- raster(here("set_up", "final_rasters", "costs", "kernel_d_fishing_moz_v2.tif"))
+cost_artisanal <- raster(here("set_up", "final_rasters", "costs", "cost_art_fish.tif"))
 
-## now we need to grab the Moz raster we previously created to make sure the artisanal fishing raster is in the right projections
-art_fish <- raster::projectRaster(art_fish_rast, pu_2, res = 10000, method = 'ngb')
-
-## create a data frame to see what value ranges we are working with
-art_fish_df <- as.data.frame(art_fish)
-
-## plot to see what it looks like
-plot(art_fish)
- 
-## Priortizr does not like cost values of NA or 0 so changed both to 0.1
-art_fish[art_fish <= 0] <- 0.1
-art_test <- as.data.frame(art_fish)
-
-#art_fish_rast <- subs(pu_2, art_fish_test, by = 'id', which = 'fish_press')
-
-plot(art_fish)
-
-## Since we changed all NAs values to 0.1 we need to mask this to MZ eez since we are now picking up terrestrial areas 
-cost_art_fish <- mask(art_fish, mz_rast_id)
-plot(cost_art_fish)
-
-## Looks good lets save as a tif
-writeRaster(cost_art_fish, here('set_up/final_rasters/cost_art_fish.tif'), overwrite = TRUE)
-
+### plot to make sure it looks okay
+plot(cost_artisanal)
 ```
 
 #### Conservation Features
 This includes all species distributions and habitat rasters
 
 ```{r}
-# List of conservation features that will have been loaded into the global environment in other scenarios (ie scenario_1_area)
+# List of conservation features that will have been loaded into the global environment in other
+### pull in species stack that we created in set-up step 3
 
-#species_stack
+features_stack <- brick(here("set_up", "final_rasters", "all_features_stack.tif"))
 
-#habitat_stack
-
-##combine into 
-#features_stack
+### plot to make sure it looks okay
+plot(features_stack)
 ```
 
 ### Additional Files (Locked-in & Locked-out)
 ```{r}
-# List of additional files that will have been loaded into the global environment in other scenarios (ie scenario_1_area)
-
-#exist_mpas
-
-#oil_rast
+### read in existing mpas raster
+exist_mpas <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
 
 ```
 
@@ -98,11 +72,11 @@ This includes all species distributions and habitat rasters
 ### OBJECTIVE: Minimize artisanal fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0
 
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
-prob_artisanal <- problem(cost_art_fish, features = features_stack) %>%
+prob_artisanal <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 10)
+  add_gurobi_solver(gap = 0.01, time_limit = 120)
 
 ## Solve problem
 sprob_artisanal <- solve(prob_artisanal)

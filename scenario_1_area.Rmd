@@ -37,21 +37,11 @@ plot(pu)
 #### Cost Layer
 Other scenarios will require more prep to create cost layer, so they will be found in separate Rmarkdowns. Since this scenario is so short, we created it in this Rmarkdown. 
 ```{r}
-### pull in the initial MZ EEZ raster to start with
-area_raster <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
+### pull in the cost layer created in setup step 9
+cost_area <- raster(here("set_up", "final_rasters", "costs", "area_cost.tif"))
 
-### assign a uniform cost value of 0.5 to all cells since the area of the planning units are the same. 
-### We assigned a value of 0.5 since we will transform cost layers in future simulations to be between 0-1 and this 0.5 is a middle value in this range 
-values(area_raster) <- 0.5
-
-### mask the area raster to just the MZ EEZ, so all cells outside the EEZ are assigned NA AND rename it to cost_area
-cost_area <- mask(area_raster, pu)
-
-### check it by plotting!
+### plot to make sure it looks okay
 plot(cost_area)
-
-### write raster
-writeRaster(cost_area, here('set_up/final_rasters/area_cost.tif'), overwrite = TRUE)
 
 ```
 
@@ -59,23 +49,15 @@ writeRaster(cost_area, here('set_up/final_rasters/area_cost.tif'), overwrite = T
 #### Conservation Features
 This includes all species distributions and habitat rasters
 
-**Creating Species Stack**
 ```{r}
 ### pull in species stack that we created in set-up step 3
 
-species_stack <- brick(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
+features_stack <- brick(here("set_up", "final_rasters", "all_features_stack.tif"))
 
-plot(species_stack)
-
-```
-
-
-
-Creating Final Conservation Feature 
-```{r}
+### plot to make sure it looks okay
+plot(features_stack)
 
 ```
-
 
 ### Additional Files (Locked-in & Locked-out)
 ```{r}
