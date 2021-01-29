@@ -65,9 +65,14 @@ wcs_mz_bruv_maxn_points <- wcs_mz_bruv_maxn %>%
   drop_na(long_y) %>%  # had to remove NAs for the next function to work
   mutate(id=1:n()) 
 
+# Change `NA` values of names with `Unknown`: 
+wcs_mz_bruv_maxn_points$genus_species[is.na(wcs_mz_bruv_maxn_points$genus_species)] <- "Unknown"
+
 ## Convert the data frame to a simple features object (sf) to create a geometry for each id
 wcs_bruv_sf_maxn  <-  st_as_sf(wcs_mz_bruv_maxn_points, coords = c("long_y", "lat_x"), crs= 4326) %>% 
   st_transform(., crs = st_crs(mz_eez_sf)) # tranform to match the mz_eez crs
+
+
 
 ## check to make sure it matches
 st_crs(wcs_bruv_sf_maxn)
