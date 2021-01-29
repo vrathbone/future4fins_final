@@ -50,18 +50,19 @@ art_fish_df <- as.data.frame(art_fish)
 plot(art_fish)
  
 ## Priortizr does not like cost values of NA or 0 so changed both to 0.1
-art_fish[is.na(art_fish[])] <- 0.001
+art_fish[is.na(art_fish[])] <- 0
 plot(art_fish)
 
 ## since we changed all NAs to 0.001 we need to again mask it to change values on land to NA
-art_fish <- mask(art_fish, mz_eez_buffer_sf)
+art_fish <- mask(art_fish, mz_eez_sf)
 plot(art_fish)
 
-art_fish[art_fish == 0] <- 0.001
-plot(art_fish)
+# art_fish[art_fish == 0] <- 0.001
+# plot(art_fish)
 
 ## now lets rescale from 0 to 1
-art_fish_rescaled <- log(art_fish+1)/ cellStats(log(art_fish+1), max)
+#art_fish_rescaled <- log(art_fish+1)/ cellStats(log(art_fish+1), max)
+art_fish_rescaled <- art_fish/maxValue(art_fish)
 plot(art_fish_rescaled)
 
 ## Looks good lets save as a tif
