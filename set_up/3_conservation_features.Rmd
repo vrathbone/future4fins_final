@@ -245,7 +245,7 @@ plot(features_stack)
 features_df <- as.data.frame(features_stack)
 
 ### write raster
-writeRaster(features_stack, here('set_up/final_rasters/all_features_stack.tif'),options="INTERLEAVE=BAND", overwrite = TRUE)
+writeRaster(features_stack, here('set_up/final_rasters/conservation_features/all_features_stack.tif'),options="INTERLEAVE=BAND", overwrite = TRUE)
 ```
 
 

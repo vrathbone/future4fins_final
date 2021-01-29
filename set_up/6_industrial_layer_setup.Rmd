@@ -36,40 +36,51 @@ st_crs(mz_eez_sf)
 ## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
 mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 ```
-
+#### **STEP 2: Read in all industrial rasters**
 ```{r}
 #read in tifs as rasters
+long_line <- raster(here("set_up", "raw_data", "industrial", "fishing_line_kernel_density_noports.tif"))
 
-long_line <- raster(here("set_up", "final_rasters", "costs", "industrial", "fishing_line_kernel_density_noports.tif"))
+gamba <- raster(here("set_up", "raw_data", "industrial", "Gamba_fishing_density_noports.tif"))
 
-gamba <- raster(here("set_up", "final_rasters", "costs", "industrial", "Gamba_fishing_density_noports.tif"))
+shrimp <- raster(here("set_up", "raw_data", "industrial", "Shrimp_fishing_density_noports.tif"))
 
-shrimp <- raster(here("set_up", "final_rasters", "costs", "industrial", "Shrimp_fishing_density_noports.tif"))
+tuna <- raster(here("set_up", "raw_data", "industrial", "Tuna_fishing_density_noports.tif"))
+```
 
-tuna <- raster(here("set_up", "final_rasters", "costs", "industrial", "Tuna_fishing_density_noports.tif"))
+#### **STEP 3: Recreate Longline Raster**
+```{r}
+### reproject the long-line raster to match the mz_rast_id
+long_line_rp <- projectRaster(long_line, mz_rast_id, 
+                              res = 10000, 
+                              method = 'ngb',
+                              crs = crs(mz_rast_id)) 
 
-### reproject rasters to be in correct extent and crs
-
-### long-line
-long_line_rp <- projectRaster(long_line, mz_rast_id, res = 10000, method = 'ngb',
-                crs = crs(mz_rast_id)) 
-
+### Priortizr does not like cost values of NA so first let's change all the NA's --> 0
 long_line_rp[is.na(long_line_rp[])] <- 0
 plot(long_line_rp)
 
+## let's check it!
 long_line_df <- long_line_rp %>% 
   as.data.frame()
 
+### since we changed all NAs to 0 we need to again mask it to change values on land and past the EEZ to NA
 long_line_rp <- mask(long_line_rp, mz_eez_sf)
 plot(long_line_rp)
 
-# long_line_rp[long_line_rp == 0] <- 0.001
-# plot(long_line_rp)
+### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
+long_line_rp[long_line_rp == 0] <- 0.0001
+plot(long_line_rp)
 
+## let's check it!
+long_line_df <- long_line_rp %>% 
+  as.data.frame()
+
+### now lets rescale from 0 to 1
 #long_line_rescaled <- log(long_line_rp+1)/ cellStats(log(long_line_rp+1), max)
-
 long_line_rescaled <- long_line_rp/maxValue(long_line_rp)
 
+## let's check it again
 long_line_rescaled_df <- long_line_rescaled %>% 
   as.data.frame()
 
@@ -77,88 +88,150 @@ plot(long_line_rescaled)
 
 ```
 
+#### **STEP 4: Recreate Gamba Raster**
 ```{r}
-### gamba
-gamba_rp <- projectRaster(gamba, mz_rast_id, res = 10000, method = 'ngb',
-                crs = crs(mz_rast_id))
+### reproject the gamba raster to match the mz_rast_id
+gamba_rp <- projectRaster(gamba, mz_rast_id, 
+                          res = 10000, 
+                          method = 'ngb',
+                          crs = crs(mz_rast_id))
+plot(gamba_rp)
 
+### Priortizr does not like cost values of NA so first let's change all the NA's --> 0
 gamba_rp[is.na(gamba_rp[])] <- 0
 plot(gamba_rp)
 
+## let's check it!
+gamba_df <- gamba_rp %>% 
+  as.data.frame()
+
+### since we changed all NAs to 0 we need to again mask it to change values on land and past the EEZ to NA
 gamba_rp <- mask(gamba_rp, mz_eez_sf)
 plot(gamba_rp)
 
-# gamba_rp[gamba_rp == 0] <- 0.001
-# plot(gamba_rp)
+### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
+gamba_rp[gamba_rp == 0] <- 0.0001
+plot(gamba_rp)
 
+## let's check it!
+gamba_df <- gamba_rp %>% 
+  as.data.frame()
+
+### now lets rescale from 0 to 1
 #gamba_rescaled <- log(gamba_rp+1)/ cellStats(log(gamba_rp+1), max)
 gamba_rescaled <- gamba_rp/maxValue(gamba_rp)
+
+## let's check it again
+gamba_rescaled_df <- gamba_rescaled %>% 
+  as.data.frame()
+
 plot(gamba_rescaled)
 
 
 ```
-
+#### **STEP 5: Recreate Shrimp Raster**
 ```{r}
-### shrimp
-shrimp_rp <- projectRaster(shrimp, mz_rast_id, res = 10000, method = 'ngb',
-                crs = crs(mz_rast_id))
+### reproject the shrimp raster to match the mz_rast_id
+shrimp_rp <- projectRaster(shrimp, mz_rast_id, 
+                           res = 10000, 
+                           method = 'ngb',
+                           crs = crs(mz_rast_id))
+plot(shrimp_rp)
 
+### Priortizr does not like cost values of NA so first let's change all the NA's --> 0
 shrimp_rp[is.na(shrimp_rp[])] <- 0.001
 plot(shrimp_rp)
 
+## let's check it!
+shrimp_df <- shrimp_rp %>% 
+  as.data.frame()
+
+### since we changed all NAs to 0 we need to again mask it to change values on land and past the EEZ to NA
 shrimp_rp  <- mask(shrimp_rp, mz_eez_sf)
 plot(shrimp_rp)
 
-# shrimp_rp[shrimp_rp == 0] <- 0.001
-# plot(shrimp_rp)
+### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
+shrimp_rp[shrimp_rp == 0] <- 0.0001
+plot(shrimp_rp)
 
+## let's check it!
+shrimp_df <- shrimp_rp %>% 
+  as.data.frame()
+
+## now lets rescale from 0 to 1
 #shrimp_rescaled <- log(shrimp_rp+1)/ cellStats(log(shrimp_rp+1), max)
 shrimp_rescaled <- shrimp_rp/maxValue(shrimp_rp)
-plot(shrimp_rescaled)
 
+## let's check it again
+shrimp_rescaled_df <- shrimp_rescaled %>% 
+  as.data.frame()
+
+plot(shrimp_rescaled)
 
 ```
 
-
+#### **STEP 6: Recreate Tuna Raster**
 ```{r}
-### tuna
-tuna_rp <- projectRaster(tuna, mz_rast_id, res = 10000, method = 'ngb',
-                crs = crs(mz_rast_id)) 
+### reproject the tuna raster to match the mz_rast_id
+tuna_rp <- projectRaster(tuna, mz_rast_id, 
+                         res = 10000,
+                         method = 'ngb',
+                         crs = crs(mz_rast_id)) 
+plot(tuna_rp)
 
+### Priortizr does not like cost values of NA so first let's change all the NA's --> 0
 tuna_rp[is.na(tuna_rp[])] <- 0.001
 plot(tuna_rp)
 
+## let's check it!
+tuna_df <- tuna_rp %>% 
+  as.data.frame()
+
+### since we changed all NAs to 0 we need to again mask it to change values on land and past the EEZ to NA
 tuna_rp  <- mask(tuna_rp, mz_eez_sf)
 plot(tuna_rp)
 
-# tuna_rp[tuna_rp == 0] <- 0.001
-# plot(tuna_rp)
+### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
+tuna_rp[tuna_rp == 0] <- 0.0001
+plot(tuna_rp)
 
+## let's check it!
+tuna_df <- tuna_rp %>% 
+  as.data.frame()
+
+## now lets rescale from 0 to 1
 #tuna_rescaled <- log(tuna_rp+1)/ cellStats(log(tuna_rp+1), max)
 tuna_rescaled <- tuna_rp/maxValue(tuna_rp)
+
+## let's check it again
+tuna_rescaled_df <- tuna_rescaled %>% 
+  as.data.frame()
+
 plot(tuna_rescaled)
 ```
-
+#### **STEP 7: Create a raster stack**
 ```{r}
-
-#create raster stack
+## create raster stack of all industrial layers
 industrial_stack <-  stack(long_line_rescaled, gamba_rescaled, shrimp_rescaled, tuna_rescaled)
 plot(industrial_stack)
 
+## let's check it
 industrial_stack_df <- industrial_stack %>% 
   as.data.frame()
 
-industrial_stack_sum <- sum(industrial_stack)
+## use the raster::calc function to sum all layer into one
+industrial_stack_sum <- calc(industrial_stack, fun = sum)
 plot(industrial_stack_sum)
 
+## rescale it from 0-1 so all cost layers are on the same scale
 #industrial_stack_rescaled <- log(industrial_stack_sum+1)/ cellStats(log(industrial_stack_sum+1), max)
 industrial_stack_sum_rescaled <- industrial_stack_sum/maxValue(industrial_stack_sum)
+plot(industrial_stack_sum_rescaled)
 
-plot(industrial_stack_rescaled)
+## let's check it
+industrial_stack_sum_rescaled_df <- industrial_stack_sum_rescaled %>% as.data.frame()
 
-industrial_stack_rescaled_df <- industrial_stack_rescaled %>% as.data.frame()
-
-
-writeRaster(industrial_stack, here('set_up/final_rasters/costs/cost_industrial_stack.tif'), overwrite = TRUE)
+### save it
+writeRaster(industrial_stack_sum_rescaled, here('set_up/final_rasters/costs/cost_industrial_sum.tif'), overwrite = TRUE)
 ```
 
