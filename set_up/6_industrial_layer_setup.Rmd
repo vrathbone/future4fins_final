@@ -68,21 +68,32 @@ long_line_df <- long_line_rp %>%
 long_line_rp <- mask(long_line_rp, mz_eez_sf)
 plot(long_line_rp)
 
-### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
-long_line_rp[long_line_rp == 0] <- 0.0001
-plot(long_line_rp)
-
-## let's check it!
 long_line_df <- long_line_rp %>% 
   as.data.frame()
 
+### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
+# long_line_rp[long_line_rp == 0] <- 0.0001
+# plot(long_line_rp)
+
+long_line_rescaled_df <- long_line_rp %>%
+  as.data.frame() %>%
+  mutate(longline_convert = case_when(fishing_line_kernel_density_noports < 0.4 ~ 0,
+                                       TRUE ~ as.numeric(.$fishing_line_kernel_density_noports))) %>%
+  mutate(longline_rescale = longline_convert/max(longline_convert, na.rm = TRUE)) %>%
+  mutate(longline_nonzero = case_when(longline_rescale == 0 ~ .0001,
+                                      TRUE ~ as.numeric(.$longline_rescale))) %>%
+  mutate(id = 1:n())
+
+
 ### now lets rescale from 0 to 1
 #long_line_rescaled <- log(long_line_rp+1)/ cellStats(log(long_line_rp+1), max)
-long_line_rescaled <- long_line_rp/maxValue(long_line_rp)
+# long_line_rescaled <- long_line_rp/maxValue(long_line_rp)
+# 
+# ## let's check it again
+# long_line_rescaled_df <- long_line_rescaled %>% 
+#   as.data.frame()
 
-## let's check it again
-long_line_rescaled_df <- long_line_rescaled %>% 
-  as.data.frame()
+long_line_rescaled <- subs(mz_rast_id, long_line_rescaled_df, by = 'id', which = 'longline_nonzero')
 
 plot(long_line_rescaled)
 
@@ -109,23 +120,34 @@ gamba_df <- gamba_rp %>%
 gamba_rp <- mask(gamba_rp, mz_eez_sf)
 plot(gamba_rp)
 
-### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
-gamba_rp[gamba_rp == 0] <- 0.0001
-plot(gamba_rp)
+gamba_rescaled_df <- gamba_rp %>%
+  as.data.frame() %>%
+  mutate(gamba_convert = case_when(Gamba_fishing_density_noports < .52 ~ 0,
+                                       TRUE ~ as.numeric(.$Gamba_fishing_density_noports))) %>%
+  mutate(gamba_rescale = gamba_convert/max(gamba_convert, na.rm = TRUE)) %>%
+  mutate(gamba_nonzero = case_when(gamba_rescale == 0 ~ .0001,
+                                      TRUE ~ as.numeric(.$gamba_rescale))) %>%
+  mutate(id = 1:n())
 
-## let's check it!
-gamba_df <- gamba_rp %>% 
-  as.data.frame()
-
-### now lets rescale from 0 to 1
-#gamba_rescaled <- log(gamba_rp+1)/ cellStats(log(gamba_rp+1), max)
-gamba_rescaled <- gamba_rp/maxValue(gamba_rp)
-
-## let's check it again
-gamba_rescaled_df <- gamba_rescaled %>% 
-  as.data.frame()
+gamba_rescaled <- subs(mz_rast_id, gamba_rescaled_df, by = 'id', which = 'gamba_nonzero')
 
 plot(gamba_rescaled)
+
+### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
+# gamba_rp[gamba_rp == 0] <- 0.0001
+# plot(gamba_rp)
+# 
+# ## let's check it!
+# gamba_df <- gamba_rp %>% 
+#   as.data.frame()
+# 
+# ### now lets rescale from 0 to 1
+# #gamba_rescaled <- log(gamba_rp+1)/ cellStats(log(gamba_rp+1), max)
+# gamba_rescaled <- gamba_rp/maxValue(gamba_rp)
+# 
+# ## let's check it again
+# gamba_rescaled_df <- gamba_rescaled %>% 
+#   as.data.frame()
 
 
 ```
@@ -139,7 +161,7 @@ shrimp_rp <- projectRaster(shrimp, mz_rast_id,
 plot(shrimp_rp)
 
 ### Priortizr does not like cost values of NA so first let's change all the NA's --> 0
-shrimp_rp[is.na(shrimp_rp[])] <- 0.001
+shrimp_rp[is.na(shrimp_rp[])] <- 0
 plot(shrimp_rp)
 
 ## let's check it!
@@ -150,23 +172,36 @@ shrimp_df <- shrimp_rp %>%
 shrimp_rp  <- mask(shrimp_rp, mz_eez_sf)
 plot(shrimp_rp)
 
-### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
-shrimp_rp[shrimp_rp == 0] <- 0.0001
-plot(shrimp_rp)
+shrimp_rescaled_df <- shrimp_rp %>%
+  as.data.frame() %>%
+  mutate(shrimp_convert = case_when(Shrimp_fishing_density_noports < 2.5 ~ 0,
+                                       TRUE ~ as.numeric(.$Shrimp_fishing_density_noports))) %>%
+  mutate(shrimp_rescale = shrimp_convert/max(shrimp_convert, na.rm = TRUE)) %>%
+  mutate(shrimp_nonzero = case_when(shrimp_rescale == 0 ~ .0001,
+                                      TRUE ~ as.numeric(.$shrimp_rescale))) %>%
+  mutate(id = 1:n())
 
-## let's check it!
-shrimp_df <- shrimp_rp %>% 
-  as.data.frame()
-
-## now lets rescale from 0 to 1
-#shrimp_rescaled <- log(shrimp_rp+1)/ cellStats(log(shrimp_rp+1), max)
-shrimp_rescaled <- shrimp_rp/maxValue(shrimp_rp)
-
-## let's check it again
-shrimp_rescaled_df <- shrimp_rescaled %>% 
-  as.data.frame()
+shrimp_rescaled <- subs(mz_rast_id, shrimp_rescaled_df, by = 'id', which = 'shrimp_nonzero')
 
 plot(shrimp_rescaled)
+
+### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
+# shrimp_rp[shrimp_rp == 0] <- 0.0001
+# plot(shrimp_rp)
+# 
+# ## let's check it!
+# shrimp_df <- shrimp_rp %>% 
+#   as.data.frame()
+# 
+# ## now lets rescale from 0 to 1
+# #shrimp_rescaled <- log(shrimp_rp+1)/ cellStats(log(shrimp_rp+1), max)
+# shrimp_rescaled <- shrimp_rp/maxValue(shrimp_rp)
+# 
+# ## let's check it again
+# shrimp_rescaled_df <- shrimp_rescaled %>% 
+#   as.data.frame()
+# 
+# plot(shrimp_rescaled)
 
 ```
 
@@ -180,7 +215,7 @@ tuna_rp <- projectRaster(tuna, mz_rast_id,
 plot(tuna_rp)
 
 ### Priortizr does not like cost values of NA so first let's change all the NA's --> 0
-tuna_rp[is.na(tuna_rp[])] <- 0.001
+tuna_rp[is.na(tuna_rp[])] <- 0
 plot(tuna_rp)
 
 ## let's check it!
@@ -191,24 +226,47 @@ tuna_df <- tuna_rp %>%
 tuna_rp  <- mask(tuna_rp, mz_eez_sf)
 plot(tuna_rp)
 
-### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
-tuna_rp[tuna_rp == 0] <- 0.0001
-plot(tuna_rp)
+tuna_rescaled_df <- tuna_rp %>%
+  as.data.frame() %>%
+  mutate(tuna_convert = case_when(Tuna_fishing_density_noports < 2.3 ~ 0,
+                                       TRUE ~ as.numeric(.$Tuna_fishing_density_noports))) %>%
+  mutate(tuna_rescale = tuna_convert/max(tuna_convert, na.rm = TRUE)) %>%
+  mutate(tuna_nonzero = case_when(tuna_rescale == 0 ~ .0001,
+                                      TRUE ~ as.numeric(.$tuna_rescale))) %>%
+  mutate(id = 1:n())
 
-## let's check it!
-tuna_df <- tuna_rp %>% 
-  as.data.frame()
 
-## now lets rescale from 0 to 1
-#tuna_rescaled <- log(tuna_rp+1)/ cellStats(log(tuna_rp+1), max)
-tuna_rescaled <- tuna_rp/maxValue(tuna_rp)
+### now lets rescale from 0 to 1
+#long_line_rescaled <- log(long_line_rp+1)/ cellStats(log(long_line_rp+1), max)
+# long_line_rescaled <- long_line_rp/maxValue(long_line_rp)
+# 
+# ## let's check it again
+# long_line_rescaled_df <- long_line_rescaled %>% 
+#   as.data.frame()
 
-## let's check it again
-tuna_rescaled_df <- tuna_rescaled %>% 
-  as.data.frame()
+tuna_rescaled <- subs(mz_rast_id, tuna_rescaled_df, by = 'id', which = 'tuna_nonzero')
 
 plot(tuna_rescaled)
+
+
+### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
+# tuna_rp[tuna_rp == 0] <- 0.0001
+# plot(tuna_rp)
+# 
+# ## let's check it!
+# tuna_df <- tuna_rp %>% 
+#   as.data.frame()
+# 
+# ## now lets rescale from 0 to 1
+# #tuna_rescaled <- log(tuna_rp+1)/ cellStats(log(tuna_rp+1), max)
+# tuna_rescaled <- tuna_rp/maxValue(tuna_rp)
+# 
+# ## let's check it again
+# tuna_rescaled_df <- tuna_rescaled %>% 
+#   as.data.frame()
+
 ```
+
 #### **STEP 7: Create a raster stack**
 ```{r}
 ## create raster stack of all industrial layers
