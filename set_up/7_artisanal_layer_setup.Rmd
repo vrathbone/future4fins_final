@@ -64,18 +64,29 @@ plot(art_fish)
 # plot(art_fish)
 # #art_fish_rescaled[art_fish_rescaled == 0] <- 500
 
-### now let's check it
+### now let's check it #x100 method
+# art_fish_df <- art_fish %>% 
+#   as.data.frame() %>%
+#   mutate(artisanal_rescale = kernel_d_fishing_moz_v2/max(kernel_d_fishing_moz_v2, na.rm = TRUE)*100) %>% 
+#   mutate(artisanal_nozero = case_when(artisanal_rescale == 0 ~ .1, 
+#                                       artisanal_rescale < 0.5 ~ .1,
+#                                       TRUE ~ as.numeric(.$artisanal_rescale))) %>% 
+#   mutate(id = 1:n())
+
+
+### now let's check it #0-1 method
 art_fish_df <- art_fish %>% 
   as.data.frame() %>%
-  mutate(artisanal_rescale = kernel_d_fishing_moz_v2/max(kernel_d_fishing_moz_v2, na.rm = TRUE)*100) %>% 
-  mutate(artisanal_nozero = case_when(artisanal_rescale == 0 ~ .1, 
-                                      artisanal_rescale < 0.5 ~ .1,
+  mutate(artisanal_convert = case_when(kernel_d_fishing_moz_v2 < 0.1 ~ 0,
+                                       TRUE ~ as.numeric(.$kernel_d_fishing_moz_v2))) %>%
+  mutate(artisanal_rescale = artisanal_convert/max(artisanal_convert, na.rm = TRUE)) %>% 
+  mutate(artisanal_nonzero = case_when(artisanal_rescale == 0 ~ .0001, 
                                       TRUE ~ as.numeric(.$artisanal_rescale))) %>% 
   mutate(id = 1:n())
   
 
 ### now that we've changed the zeros and rescaled, convert back to a raster
-art_fish_rescaled <- subs(mz_rast_id, art_fish_df, by = 'id', which = 'artisanal_nozero')
+art_fish_rescaled <- subs(mz_rast_id, art_fish_df, by = 'id', which = 'artisanal_nonzero')
 plot(art_fish_rescaled)
 
 
