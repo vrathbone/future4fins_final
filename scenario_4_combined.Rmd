@@ -15,7 +15,7 @@ library(stringr)
 library(janitor)
 library(prioritizr)
 library(rgdal)
-#library(gurobi)
+library(gurobi)
 
 ```
 
@@ -37,7 +37,7 @@ plot(pu_4)
 #### Cost Layer
 ```{r}
 ### pull in the combined fishing pressure tif file from costs folder in repo
-cost_combined <- brick(here("set_up", "final_rasters", "costs", "combined_fishing_stack.tif"))
+cost_combined <- raster(here("set_up", "final_rasters", "costs", "combined_stack_sum.tif"))
 
 ### plot to make sure it looks okay
 plot(cost_combined)
@@ -49,19 +49,19 @@ This includes all species distributions and habitat rasters
 ```{r}
 # List of conservation features that will have been loaded into the global environment in other
 ### pull in species stack that we created in set-up step 3
-features_stack <- brick(here("set_up", "final_rasters", "conservation_features", "all_features_stack.tif"))
+features_stack_4 <- brick(here("set_up", "final_rasters", "conservation_features", "all_features_stack.tif"))
 
 ### plot to make sure it looks okay
-plot(features_stack)
+plot(features_stack_4)
 ```
 
 ### Additional Files (Locked-in & Locked-out)
 ```{r}
 ### read in existing mpas raster
-exist_mpas <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
+exist_mpas_4 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
 
 ### plot to make sure it looks okay
-plot(exist_mpas)
+plot(exist_mpas_4)
 ```
 
 ## **STEP 2: Run Some combined Fishing Scenarios!**
@@ -73,11 +73,11 @@ plot(exist_mpas)
 ### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0
 
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
-prob_combined_20 <- problem(cost_combined, features = features_stack) %>%
+prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120)
+  add_locked_in_constraints(exist_mpas_4) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120) 
 
 ## Solve problem
 sprob_combined_20 <- solve(prob_combined_20)

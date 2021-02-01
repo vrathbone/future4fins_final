@@ -1,0 +1,85 @@
+---
+title: "Scenario 5 - Inverse Combined Fishing"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(raster)
+library(tidyverse)
+library(sf)
+library(here)
+library(fasterize)
+library(stringr)
+library(janitor)
+library(prioritizr)
+library(rgdal)
+library(gurobi)
+```
+
+## Scenario 5 - Inverse Combined Fishing Pressure 
+The objective of this scenario was to protect important areas for sharks and rays based on their distribution from IUCN and location of suitable habitats while targeting the areas with high fishing pressure  For this run, we used the inverse of the combined fishing pressure layer as the cost, set targets of 20% for all conservation features, locked in planning units that included existing MPAs, and set a boundary penalty to zero. 
+
+### **STEP 1: Assign planning units, cost layer, and conservation feature**
+
+#### Planning Unit
+```{r}
+# ### reading in the baseline MZ EEZ raster (with cell ids) 
+pu_5 <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
+
+# ### plot to make sure it looks okay
+plot(pu_5)
+```
+
+#### Cost Layer
+```{r}
+### pull in the combined fishing pressure tif file from costs folder in repo
+cost_combined_inverse <- raster(here("set_up", "final_rasters", "costs", "combined_inverse_simple.tif"))
+
+### plot to make sure it looks okay
+plot(cost_combined_inverse)
+```
+
+#### Conservation Features
+This includes all species distributions and habitat rasters
+
+```{r}
+# List of conservation features that will have been loaded into the global environment in other
+### pull in species stack that we created in set-up step 3
+features_stack_5 <- brick(here("set_up", "final_rasters", "conservation_features", "all_features_stack.tif"))
+
+### plot to make sure it looks okay
+plot(features_stack_5)
+```
+
+### Additional Files (Locked-in & Locked-out)
+```{r}
+### read in existing mpas raster
+exist_mpas_5 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
+
+### plot to make sure it looks okay
+plot(exist_mpas_5)
+```
+
+## **STEP 2: Run Some inverse combined Fishing Scenarios!**
+
+**Changing the targets!**
+
+#### SCENARIO 1: combined - 20% target, Boundary Penalty = 0,  
+```{r}
+### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_inverse_20 <- problem(cost_combined_inverse, features = features_stack_5) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas_5) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
+  add_boundary_penalties(0.001)
+
+## Solve problem
+sprob_combined_inverse_20 <- solve(prob_combined_inverse_20)
+## Plot the solution to see what it looks like
+plot(sprob_combined_inverse_20,  main = c("inverse- 20% Targets"))
+```

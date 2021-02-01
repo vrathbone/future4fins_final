@@ -57,7 +57,6 @@ plot(combined_stack_sum)
 
 
 writeRaster(combined_stack_sum, here('set_up/final_rasters/costs/combined_stack_sum.tif'), 
-            options="INTERLEAVE=BAND",
             overwrite = TRUE)
 
 ### save it
