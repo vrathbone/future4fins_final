@@ -291,5 +291,9 @@ industrial_stack_sum_rescaled_df <- industrial_stack_sum_rescaled %>% as.data.fr
 
 ### save it
 writeRaster(industrial_stack_sum_rescaled, here('set_up/final_rasters/costs/cost_industrial_sum.tif'), overwrite = TRUE)
+
+### save the stack that's not rescaled a second time
+writeRaster(industrial_stack_sum, here('set_up/final_rasters/costs/cost_industrial_sum_unscaled.tif'), options = "INTERLEAVE=BAND", overwrite = TRUE)
+
 ```
 
