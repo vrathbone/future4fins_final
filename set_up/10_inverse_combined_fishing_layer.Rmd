@@ -59,3 +59,12 @@ writeRaster(combined_sum_inverse, here("set_up", "final_rasters", "costs", "comb
 
 ```
 
+```{r}
+tmap_mode("view") # Set to interactive viewing
+
+tm_shape(combined_inverse_simple_rast) +
+  tm_basemap("Stamen.Terrain")+
+  tm_raster("combined_stack_sum", alpha=0.9, palette = "viridis")
+  
+```
+

@@ -106,3 +106,13 @@ plot(art_fish_rescaled)
 writeRaster(art_fish_rescaled, here('set_up/final_rasters/costs/cost_art_fish.tif'), overwrite = TRUE)
 ```
 
+
+```{r}
+tmap_mode("view") # Set to interactive viewing
+
+tm_shape(art_fish_rescaled) +
+  tm_basemap("Stamen.Terrain")+
+  tm_raster("artisanal_nonzero", alpha=0.9, palette = "viridis")
+  
+```
+

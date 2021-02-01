@@ -297,3 +297,17 @@ writeRaster(industrial_stack_sum, here('set_up/final_rasters/costs/cost_industri
 
 ```
 
+
+```{r}
+tmap_mode("view") # Set to interactive viewing
+
+tm_shape(industrial_stack_sum_rescaled) +
+  tm_basemap("Stamen.Terrain")+
+  tm_raster("layer", alpha=0.9, palette = "viridis")
+  
+```
+
+
+
+
+

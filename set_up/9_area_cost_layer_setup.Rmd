@@ -13,6 +13,7 @@ library(here)
 library(fasterize)
 library(stringr)
 library(janitor)
+library(tmap)
 ```
 
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
@@ -52,5 +53,18 @@ plot(cost_area)
 ### write raster
 writeRaster(cost_area, here('set_up/final_rasters/costs/area_cost.tif'), overwrite = TRUE)
 ```
+
+```{r}
+tmap_mode("view") # Set to interactive viewing
+
+tm_shape(cost_area) +
+  tm_basemap("Stamen.Terrain")+
+  tm_raster("mz_rast_id",alpha=0.9, palette="viridis")
+  
+```
+
+
+
+
 
 
