@@ -92,7 +92,10 @@ plot(sprob_artisanal_20,  main = c("Artisanal- 20% Targets"))
 
 #Save plot
 writeRaster(sprob_artisanal_20, here("final_results", "sprob_artisanal_20_tl86400_blm0.tif"), overwrite = TRUE)
+
 ```
+
+
 
 #### SCENARIO 2: Artisanal - 10% target, Boundary Penalty = 0 
 ```{r}
