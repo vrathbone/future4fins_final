@@ -121,3 +121,108 @@ plot(sprob_combined_50,  main = c("combined- 50% Targets"))
 ```
 
 
+
+***
+
+## BLM Sensitivity Analysis
+
+##1 Royal Penguin
+#### BLM: .0000001, Combined, 20% Target, MPAs locked in - 20% target, 6hr time limit
+```{r}
+### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0.0000001
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas_4) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.0000001)
+
+## Solve problem
+sprob_combined_20 <- solve(prob_combined_20)
+## Plot the solution to see what it looks like
+plot(sprob_combined_20,  main = c("combined- 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.0000001.tif"), overwrite = TRUE)
+
+```
+
+##2 Islay
+#### BLM: .000001, Combined, 20% Target, MPAs locked in - 20% target, 6hr time limit
+```{r}
+### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0.0000001
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas_4) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.000001)
+
+## Solve problem
+sprob_combined_20 <- solve(prob_combined_20)
+## Plot the solution to see what it looks like
+plot(sprob_combined_20,  main = c("combined- 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.000001.tif"), overwrite = TRUE)
+
+```
+
+##3 Dugong
+#### BLM: .00001, Combined, 20% Target, MPAs locked in - 20% target, 6hr time limit
+```{r}
+### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0.0000001
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas_4) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.00001)
+
+## Solve problem
+sprob_combined_20 <- solve(prob_combined_20)
+## Plot the solution to see what it looks like
+plot(sprob_combined_20,  main = c("combined- 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.00001.tif"), overwrite = TRUE)
+
+```
+
+##4 Dugong
+#### BLM: .0001, Combined, 20% Target, MPAs locked in - 20% target, 6hr time limit
+```{r}
+### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0.0000001
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas_4) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.0001)
+
+## Solve problem
+sprob_combined_20 <- solve(prob_combined_20)
+## Plot the solution to see what it looks like
+plot(sprob_combined_20,  main = c("combined- 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.0001.tif"), overwrite = TRUE)
+
+```
+
+
+
+
+
+
+
+
+
