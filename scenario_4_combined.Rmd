@@ -288,6 +288,30 @@ shapefile(blm1_sf, here("set_up", "blm_sensitivity", "blm1"))
 
 ```
 
+## BLM optimization curve plot
+```{r}
+#read in csv
+blm_sensitivity <- read_csv(here("set_up", "blm_sensitivity", "blm_sensitivity_values.csv"))
+
+# plot it - average area
+ggplot(data = blm_sensitivity, aes(x = area_avg_km2, y = perimeter_sum_km)) +
+  geom_point() +
+  geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
+  geom_line() +
+  labs(x = "Average Area (km2)",
+       y = "Boundary Length Sum (km)",
+       title = "BLM Sensitivity Analysis")
+
+# # plot it - total area
+# ggplot(data = blm_sensitivity, aes(x = total_area_km2, y = perimeter_sum_km)) +
+#   geom_point() +
+#   geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
+#   geom_line() +
+#   labs(x = "Total Area (km2)",
+#        y = "Boundary Length Sum (km)",
+#        title = "BLM Sensitivity Analysis - Total Area")
+
+```
 
 
 
