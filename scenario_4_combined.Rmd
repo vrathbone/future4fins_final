@@ -268,7 +268,7 @@ blm0.001_sf <- rasterToPolygons(blm0.001, fun = function(sprob_combined_20_6hr_b
 plot(blm0.001_sf)
 shapefile(blm0.001_sf, here("set_up", "blm_sensitivity", "blm21"))
 
-#BLM 0.01 - NEED TO DO
+#BLM 0.01
 blm0.01 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.01.tif"))
 blm0.01_sf <- rasterToPolygons(blm0.01, fun = function(sprob_combined_20_6hr_blm0.01){sprob_combined_20_6hr_blm0.01==1})
 plot(blm0.01_sf)
