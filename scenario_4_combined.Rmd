@@ -226,6 +226,18 @@ blm0_sf <- rasterToPolygons(blm0, fun = function(sprob_combined_20_6hr_blm0){spr
 plot(blm0_sf)
 shapefile(blm0_sf, here("set_up", "blm_sensitivity", "blm0"))
 
+#BLM 0.000000001
+blm0.000000001 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000000001.tif"))
+blm0.000000001_sf <- rasterToPolygons(blm0.000000001, fun = function(sprob_combined_20_6hr_blm0.000000001){sprob_combined_20_6hr_blm0.000000001==1})
+plot(blm0.000000001_sf)
+shapefile(blm0.000000001_sf, here("set_up", "blm_sensitivity", "blm81"))
+
+#BLM 0.00000001
+blm0.00000001 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.00000001.tif"))
+blm0.00000001_sf <- rasterToPolygons(blm0.00000001, fun = function(sprob_combined_20_6hr_blm0.00000001){sprob_combined_20_6hr_blm0.00000001==1})
+plot(blm0.00000001_sf)
+shapefile(blm0.00000001_sf, here("set_up", "blm_sensitivity", "blm71"))
+
 #BLM 0.0000001
 blm0.0000001 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.0000001.tif"))
 blm0.0000001_sf <- rasterToPolygons(blm0.0000001, fun = function(sprob_combined_20_6hr_blm0.0000001){sprob_combined_20_6hr_blm0.0000001==1})
