@@ -4,7 +4,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 library(raster)
 library(tidyverse)
@@ -13,6 +13,7 @@ library(here)
 library(sf)
 library(fasterize)
 library(tmap)
+library(ggmap)
 ```
 
 *NOT SURE IF WE ACTUALLY NEED TO INCLUDE THIS FOR JUST LOOKING AT OCCURRENCE DATA*
@@ -28,7 +29,7 @@ Notes from Dave:
 Unsure about the length sheet...
 
 ### *STEP 1: Read in WCS BRUV data*
-```{r}
+```{r, include = FALSE}
 #read in data
 # wcs_mz_bruv_length <- read_csv(here("set_up", "csv_files", "WCS_Mozambique_BRUV_data_for_Bren_2020-11-25.csv")) %>% 
 #   clean_names()
@@ -40,7 +41,7 @@ wcs_mz_bruv_maxn <- read_csv(here("set_up", "csv_files", "WCS_Mozambique_BRUV_da
 ```
 
 ### *STEP 2: Read in Mozambique EEZ sf and raster*
-```{r}
+```{r, include = FALSE}
 ## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
 mz_eez_path <- 'G:/group_project/data/mz_eez'
 mz_shape <- list.files(mz_eez_path, full.names = TRUE) 
@@ -91,9 +92,35 @@ tm_shape(wcs_bruv_sf_maxn) +
 
 ```
 
+
+### Erin Noodling
+```{r, include = FALSE}
+wcs_bruv_tofo <- wcs_mz_bruv_maxn %>% 
+  filter(area == "Praia do Tofo") %>% 
+  select(lat_x, long_y,genus_species) %>% 
+  drop_na(long_y) %>%  # had to remove NAs for the next function to work
+  mutate(id=1:n()) 
+
+wcs_bruv_tofo$genus_species[is.na(wcs_bruv_tofo$genus_species)] <- "Unknown"
+
+wcs_bruv_sf_tofo  <-  st_as_sf(wcs_bruv_tofo, coords = c("long_y", "lat_x"), crs= 4326) %>% 
+  st_transform(., crs = st_crs(mz_eez_sf)) # tranform to match the mz_eez crs
+
+eez_crop <- st_crop(mz_eez_sf, xmin = 28, xmax = 41, ymax = -26, ymin = -22) 
+
+#basemap
+#tofo_basemap <- get_map(location=c(lon = -24, lat = 35.4), zoom=11, maptype = 'terrain-background', source = 'stamen')
+
+ggplot() +
+  geom_sf(data = eez_crop) +
+  geom_sf(data = wcs_bruv_sf_tofo, aes(color = genus_species),
+          show.legend = FALSE)
+  #coord_sf(xlim = c(32, 37), ylim = c(22, 26), expand = FALSE)
+```
+
 ### *STEP 4: Create a sp object and raster of BRUV data*
 Because we are dealing with point data, we cannot use fasterize to create a raster. Instead, we convert the `sf` simple features to `sp` Spatial objects and then use rasterize to create a raster. 
-```{r}
+```{r, include = FALSE}
 ## check the class of sf
 class(wcs_bruv_sf_maxn)
 
@@ -121,7 +148,7 @@ writeRaster(wcs_bruv_rast_maxn, here('set_up/final_rasters/bruv/wcs_bruv_maxn.ti
 Follow the same steps as above.
 
 ### *STEP 1: Read in POPMR BRUV data*
-```{r}
+```{r, include = FALSE}
 #read in data
 popmr_bruv <- read_csv(here("set_up", "csv_files", "PPMR_ELAS subset_Finalised.csv")) %>% 
   clean_names() %>% 
@@ -134,7 +161,7 @@ popmr_bruv <- read_csv(here("set_up", "csv_files", "PPMR_ELAS subset_Finalised.c
 Look at code above.
 
 ### *STEP 3: Create a sf object of BRUV data*
-```{r}
+```{r, include = FALSE}
 
 ## Convert the data frame to a simple features object (sf) to create a geometry for each id
 popmr_bruv_sf  <-  st_as_sf(popmr_bruv, coords = c("x", "y"), crs= 4326) %>% 
@@ -158,7 +185,7 @@ tm_shape(popmr_bruv_sf) +
 
 ### *STEP 4: Create a sp object and raster of BRUV data*
 Because we are dealing with point data, we cannot use fasterize to create a raster. Instead, we convert the `sf` simple features to `sp` Spatial objects and then use rasterize to create a raster. 
-```{r}
+```{r, include = FALSE}
 ## check the class of sf
 class(popmr_bruv_sf)
 
@@ -186,7 +213,7 @@ writeRaster(popmr_bruv_rast, here('set_up/final_rasters/bruv/popmr_bruv.tif'), o
 Follow the same steps as above. *THIS DATASET IS OVER 1 MILLION OBSERVATIONS DON'T PUT ON GITHUB*
 
 ### *STEP 1: Read in NM BRUV data*
-```{r}
+```{r, include = FALSE}
 #read in data
 nm_bruv <- read_csv(here("set_up", "csv_files", "Northern_Mozambique_dataset_2020-11-25.csv")) %>% 
   clean_names() %>% 
@@ -199,7 +226,7 @@ nm_bruv <- read_csv(here("set_up", "csv_files", "Northern_Mozambique_dataset_202
 Look at code above.
 
 ### *STEP 3: Create a sf object of BRUV data*
-```{r}
+```{r, include = FALSE}
 
 ## Convert the data frame to a simple features object (sf) to create a geometry for each id
 nm_bruv_sf  <-  st_as_sf(nm_bruv, coords = c("long", "lat"), crs= 4326) %>% 
@@ -221,7 +248,7 @@ tm_shape(nm_bruv_sf) +
 
 ### *STEP 4: Create a sp object and raster of BRUV data*
 Because we are dealing with point data, we cannot use fasterize to create a raster. Instead, we convert the `sf` simple features to `sp` Spatial objects and then use rasterize to create a raster. 
-```{r}
+```{r, include = FALSE}
 ## check the class of sf
 class(nm_bruv_sf)
 
