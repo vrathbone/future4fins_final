@@ -137,7 +137,7 @@ prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_4) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.01)
+  add_boundary_penalties(0.000003)
 
 ## Solve problem
 sprob_combined_20 <- solve(prob_combined_20)
@@ -145,7 +145,7 @@ sprob_combined_20 <- solve(prob_combined_20)
 plot(sprob_combined_20,  main = c("combined- 20% Targets"))
 
 #Save plot
-writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.01.tif"), overwrite = TRUE)
+writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.000003.tif"), overwrite = TRUE)
 
 ```
 
@@ -183,7 +183,7 @@ prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_4) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.0001)
+  add_boundary_penalties(0.000007)
 
 ## Solve problem
 sprob_combined_20 <- solve(prob_combined_20)
@@ -191,7 +191,7 @@ sprob_combined_20 <- solve(prob_combined_20)
 plot(sprob_combined_20,  main = c("combined- 20% Targets"))
 
 #Save plot
-writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.0001.tif"), overwrite = TRUE)
+writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.000007.tif"), overwrite = TRUE)
 
 ```
 
@@ -204,9 +204,9 @@ writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0
 prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_4) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.0001)
+  #add_locked_in_constraints(exist_mpas_4) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) 
+  #add_boundary_penalties(0.0001)
 
 ## Solve problem
 sprob_combined_20 <- solve(prob_combined_20)
@@ -214,7 +214,7 @@ sprob_combined_20 <- solve(prob_combined_20)
 plot(sprob_combined_20,  main = c("combined- 20% Targets"))
 
 #Save plot
-writeRaster(sprob_combined_20, (here("final_results", "sprob_combined_20_6hr_blm0.0001.tif")), overwrite = TRUE)
+writeRaster(sprob_combined_20, (here("final_results", "sprob_combined_20_6hr_blm0_no-mpas.tif")), overwrite = TRUE)
 
 ```
 
