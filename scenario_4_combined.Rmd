@@ -160,7 +160,7 @@ prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_4) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.01)
+  add_boundary_penalties(0.000005)
 
 ## Solve problem
 sprob_combined_20 <- solve(prob_combined_20)
@@ -168,7 +168,7 @@ sprob_combined_20 <- solve(prob_combined_20)
 plot(sprob_combined_20,  main = c("combined- 20% Targets"))
 
 #Save plot
-writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.01.tif"), overwrite = TRUE)
+writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.000005.tif"), overwrite = TRUE)
 
 ```
 
@@ -279,6 +279,24 @@ blm0.1 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.1.tif"))
 blm0.1_sf <- rasterToPolygons(blm0.1, fun = function(sprob_combined_20_6hr_blm0.1){sprob_combined_20_6hr_blm0.1==1})
 plot(blm0.1_sf)
 shapefile(blm0.1_sf, here("set_up", "blm_sensitivity", "blm01"))
+
+#BLM 1
+blm1 <- raster(here("final_results", "sprob_combined_20_6hr_blm1.tif"))
+blm1_sf <- rasterToPolygons(blm1, fun = function(sprob_combined_20_6hr_blm1){sprob_combined_20_6hr_blm1==1})
+plot(blm1_sf)
+shapefile(blm1_sf, here("set_up", "blm_sensitivity", "blm1"))
+
+#BLM 0.000003
+blm0.000003 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000003.tif"))
+blm0.000003_sf <- rasterToPolygons(blm0.000003, fun = function(sprob_combined_20_6hr_blm1){sprob_combined_20_6hr_blm1==1})
+plot(blm1_sf)
+shapefile(blm1_sf, here("set_up", "blm_sensitivity", "blm1"))
+
+#BLM 1
+blm1 <- raster(here("final_results", "sprob_combined_20_6hr_blm1.tif"))
+blm1_sf <- rasterToPolygons(blm1, fun = function(sprob_combined_20_6hr_blm1){sprob_combined_20_6hr_blm1==1})
+plot(blm1_sf)
+shapefile(blm1_sf, here("set_up", "blm_sensitivity", "blm1"))
 
 #BLM 1
 blm1 <- raster(here("final_results", "sprob_combined_20_6hr_blm1.tif"))
