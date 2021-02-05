@@ -90,16 +90,19 @@ plot(sprob_industrial_20,  main = c("industrial- 20% Targets"))
 ### OBJECTIVE: Minimize area while meeting 10% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
 
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
-prob_industrial_10 <- problem(cost_industrial, features = features_stack) %>%
+prob_industrial_50 <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
-  add_relative_targets(0.1) %>%
-  add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120)
+  add_relative_targets(0.5) %>%
+  add_locked_in_constraints(exist_mpas_3) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600)
 
 ## Solve problem
-sprob_industrial_10 <- solve(prob_industrial_10)
+sprob_industrial_50 <- solve(prob_industrial_50)
 ## Plot the solution to see what it looks like
-plot(sprob_industrial_10,  main = c("Industrial- 10% Targets"))
+plot(sprob_industrial_50,  main = c("Industrial- 50% Targets"))
+
+#Save plot
+writeRaster(sprob_industrial_50, here("final_results", "scenario_3_industrial", "sprob_industrial_50_6hr_blm0.tif"), overwrite = TRUE)
 ```
 
 
