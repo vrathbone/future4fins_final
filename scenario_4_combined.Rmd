@@ -160,7 +160,7 @@ prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_4) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000005)
+  add_boundary_penalties(0.000002)
 
 ## Solve problem
 sprob_combined_20 <- solve(prob_combined_20)
@@ -168,7 +168,7 @@ sprob_combined_20 <- solve(prob_combined_20)
 plot(sprob_combined_20,  main = c("combined- 20% Targets"))
 
 #Save plot
-writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.000005.tif"), overwrite = TRUE)
+writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.000002.tif"), overwrite = TRUE)
 
 ```
 
@@ -288,21 +288,27 @@ shapefile(blm1_sf, here("set_up", "blm_sensitivity", "blm1"))
 
 #BLM 0.000003
 blm0.000003 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000003.tif"))
-blm0.000003_sf <- rasterToPolygons(blm0.000003, fun = function(sprob_combined_20_6hr_blm1){sprob_combined_20_6hr_blm1==1})
-plot(blm1_sf)
-shapefile(blm1_sf, here("set_up", "blm_sensitivity", "blm1"))
+blm0.000003_sf <- rasterToPolygons(blm0.000003, fun = function(sprob_combined_20_6hr_blm0.000003){sprob_combined_20_6hr_blm0.000003==1})
+plot(blm0.000003_sf)
+shapefile(blm0.000003_sf, here("set_up", "blm_sensitivity", "blm53"))
 
-#BLM 1
-blm1 <- raster(here("final_results", "sprob_combined_20_6hr_blm1.tif"))
-blm1_sf <- rasterToPolygons(blm1, fun = function(sprob_combined_20_6hr_blm1){sprob_combined_20_6hr_blm1==1})
-plot(blm1_sf)
-shapefile(blm1_sf, here("set_up", "blm_sensitivity", "blm1"))
+#BLM 0.000005
+blm0.000005 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000005.tif"))
+blm0.000005_sf <- rasterToPolygons(blm0.000005, fun = function(sprob_combined_20_6hr_blm0.000005){sprob_combined_20_6hr_blm0.000005==1})
+plot(blm0.000005_sf)
+shapefile(blm0.000005_sf, here("set_up", "blm_sensitivity", "blm55"))
 
-#BLM 1
-blm1 <- raster(here("final_results", "sprob_combined_20_6hr_blm1.tif"))
-blm1_sf <- rasterToPolygons(blm1, fun = function(sprob_combined_20_6hr_blm1){sprob_combined_20_6hr_blm1==1})
-plot(blm1_sf)
-shapefile(blm1_sf, here("set_up", "blm_sensitivity", "blm1"))
+#BLM 0.000007
+blm0.000007 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000007.tif"))
+blm0.000007_sf <- rasterToPolygons(blm0.000007, fun = function(sprob_combined_20_6hr_blm0.000007){sprob_combined_20_6hr_blm0.000007==1})
+plot(blm0.000007_sf)
+shapefile(blm0.000007_sf, here("set_up", "blm_sensitivity", "blm57"))
+
+#BLM 0.000002
+blm0.000002 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000002.tif"))
+blm0.000002_sf <- rasterToPolygons(blm0.000002, fun = function(sprob_combined_20_6hr_blm0.000002){sprob_combined_20_6hr_blm0.000002==1})
+plot(blm0.000002_sf)
+shapefile(blm0.000002_sf, here("set_up", "blm_sensitivity", "blm52"))
 
 ```
 
@@ -318,7 +324,8 @@ ggplot(data = blm_sensitivity, aes(x = area_avg_km2, y = perimeter_sum_km)) +
   geom_line() +
   labs(x = "Average Area (km2)",
        y = "Boundary Length Sum (km)",
-       title = "BLM Sensitivity Analysis")
+       title = "BLM Sensitivity Analysis") +
+  geom_smooth()
 
 # plot it - total area
 ggplot(data = blm_sensitivity, aes(x = total_area_km2, y = perimeter_sum_km)) +
