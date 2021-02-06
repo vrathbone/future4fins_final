@@ -337,7 +337,8 @@ ggplot(data = blm_sensitivity, aes(x = total_area_km2, y = perimeter_sum_km)) +
        title = "BLM Sensitivity Analysis - Total Area")
 
 # plot it - perimeter to area
-ggplot(data = blm_sensitivity, aes(x = BLM, y = perimeter_to_area)) +
+ggplot(data = blm_sensitivity, aes(x = perimeter_sum_km, y = total_area_km2)) +
+#ggplot(data = blm_sensitivity, aes(x = total_area_km2 , y = perimeter_sum_km)) +
   geom_point() +
   geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
   geom_line() +
