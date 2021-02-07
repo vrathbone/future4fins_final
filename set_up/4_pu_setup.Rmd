@@ -37,7 +37,7 @@ mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 ### **STEP 2: Setting up existing marine protected areas**
 ```{r}
 ## Grab protected area shapefile from computer
-exist_mpa_path <- 'G:/group_project/Data/Existing_mpas'
+exist_mpa_path <- 'G:/group_project/data/existing_mpas'
 mpa_shape <- list.files(exist_mpa_path, full.names = TRUE)
 
 ## Read in the shapefile as a simple feature
@@ -67,33 +67,70 @@ writeRaster(mpa_rast, here('set_up/final_rasters/planning_unit/exist_mpa.tif'), 
 ```
 
 
-### **STEP 3: Set up raster of oil development areas**
+### **STEP 3: Set up key biodiversity areas**
 ```{r}
 ## Read in oil tif from local computer as a raster
-oil_tif <- 'G:/group_project/Data/Oil_rigs/oil_rig_2013_halpern_et_al_2015_clipped.tif'
+kba_path <- 'G:/group_project/data/kba'
+kba_shape <- list.files(kba_path, full.names = TRUE)
 
-## Create raster
-oil_rast <- raster(oil_tif)
 
-## Reproject the oil raster to match the Moz EEZ raster
-oil_reproj <- raster::projectRaster(oil_rast, mz_rast_id, 
-                                            res = 10000,
-                                            method = 'ngb',
-                                            crs = crs(mz_rast_id))
+## Read in the shapefile as a simple feature
+kba_sf <- sf::read_sf(kba_shape[6]) 
 
-## Plot to see what it looks like
-plot(oil_reproj)
+## Check the CRS of the simple feature to make sure it matches the Mozambique Raster 
+st_crs(kba_sf)
 
-## There are terrestrial oil projects included in this file so we will need to again maks it to the MZ EEZ
-oil_rast <- mask(oil_reproj, mz_eez_sf) 
+## CRS matches so lets make a raster using the mz_rast_id to set the extent
+kba_rast <- fasterize::fasterize(kba_sf, mz_rast_id)
 
-## Plot to make sure it looks good
-plot(oil_rast)
+## Double check the CRS again 
+crs(kba_rast)
 
-## Looks good! Save it as a tif
-writeRaster(oil_rast, here('set_up/final_rasters/planning_unit/oil_rig.tif'), overwrite = TRUE)
+## Plot to make sure it looks good, note this shapefile includes all terrestrial protected areas as well so we need to clip it to just include those in the water (the EEZ)
+plot(kba_rast)
+
+## Mask the rater to the EEZ 
+kba_rast <- mask(kba_rast, mz_eez_sf) 
+
+## Double check CRS of new raster & plot to make sure it looks good
+crs(kba_rast)
+plot(kba_rast)
+
+## Looks good! Save as a tif file
+writeRaster(kba_rast, here('set_up/final_rasters/planning_unit/kba.tif'), overwrite = TRUE)
 ```
 
+
+### **STEP 4: Set up aggregation sites**
+```{r}
+## Read in oil tif from local computer as a raster
+aggregation_path <- 'G:/group_project/data/aggregation_sites'
+aggregation_shape <- list.files(aggregation_path, full.names = TRUE)
+
+
+## Read in the shapefile as a simple feature
+aggregation_sf <- sf::read_sf(aggregation_shape[6]) 
+
+## Check the CRS of the simple feature to make sure it matches the Mozambique Raster 
+st_crs(aggregation_sf)
+
+## CRS matches so lets make a raster using the mz_rast_id to set the extent
+aggregation_rast <- fasterize::fasterize(aggregation_sf, mz_rast_100)
+
+# Aggregate to become a coarser resolution at 10000 m
+aggregation_rast_agg <- raster::aggregate(aggregation_rast, fact=100, fun=sum, na.rm = TRUE)
+aggregation_rast_agg_per <- aggregation_rast_agg/10000
+
+## mask to the MZ EEZ
+aggregation_rast_agg_per <- mask(aggregation_rast_agg_per, mz_eez_sf)
+
+## Lets plot to see what it looks like
+plot(aggregation_rast_agg_per)
+
+## Save coral aggregate as raster
+writeRaster(aggregation_rast_agg_per, here('set_up/final_rasters/planning_unit/aggregation_sites.tif'), overwrite = TRUE)
+
+```
 Citations:
  - 
  
