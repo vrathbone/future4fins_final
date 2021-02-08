@@ -75,11 +75,15 @@ prob_combined_inverse_20 <- problem(cost_combined_inverse, features = features_s
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_5) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
-  add_boundary_penalties(0.001)
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.000001)
 
 ## Solve problem
 sprob_combined_inverse_20 <- solve(prob_combined_inverse_20)
 ## Plot the solution to see what it looks like
 plot(sprob_combined_inverse_20,  main = c("inverse- 20% Targets"))
+
+#Write Raster
+writeRaster(sprob_combined_inverse_20, here("final_results", "scenario_5_inverse",  "sprob_combined_inverse_20_6hr_blm0.000001.tif"), overwrite = TRUE)
+
 ```
