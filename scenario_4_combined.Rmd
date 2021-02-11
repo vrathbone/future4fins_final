@@ -57,11 +57,26 @@ plot(features_stack_4)
 
 ### Additional Files (Locked-in & Locked-out)
 ```{r}
+# MPAs
 ### read in existing mpas raster
 exist_mpas_4 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
 
 ### plot to make sure it looks okay
 plot(exist_mpas_4)
+
+#KBAs
+### read in existing kbas raster
+exist_kbas <- raster(here("set_up", "final_rasters", "planning_unit", "kba.tif"))
+
+### plot to make sure it looks okay
+plot(exist_kbas)
+
+#Aggregation Sites
+### read in existing aggregation sites raster
+exist_aggs <- raster(here("set_up", "final_rasters", "planning_unit", "aggregation_sites.tif"))
+
+### plot to make sure it looks okay
+plot(exist_aggs)
 ```
 
 ## **STEP 2: Run Some combined Fishing Scenarios!**
@@ -108,16 +123,22 @@ plot(sprob_combined_10,  main = c("combined- 10% Targets"))
 ### OBJECTIVE: Minimize area while meeting 50% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
 
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
-prob_combined_50 <- problem(cost_combined, features = features_stack) %>%
+prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
-  add_relative_targets(0.5) %>%
-  add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120)
+  add_relative_targets(0.2) %>%
+  #add_locked_in_constraints(exist_mpas_4) %>% 
+  #add_locked_in_constraints(exist_kbas) %>%
+  add_locked_in_constraints(exist_aggs) %>% 
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0)
 
 ## Solve problem
-sprob_combined_50 <- solve(prob_combined_50)
+sprob_combined_20 <- solve(prob_combined_20)
 ## Plot the solution to see what it looks like
-plot(sprob_combined_50,  main = c("combined- 50% Targets"))
+plot(sprob_combined_20,  main = c("combined- 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20, here("final_results", "sensitivity", "sprob_combined_20_6hr_blm0_aggsites.tif"), overwrite = TRUE)
 ```
 
 
