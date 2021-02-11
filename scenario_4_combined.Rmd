@@ -108,16 +108,20 @@ plot(sprob_combined_10,  main = c("combined- 10% Targets"))
 ### OBJECTIVE: Minimize area while meeting 50% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
 
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
-prob_combined_50 <- problem(cost_combined, features = features_stack) %>%
+prob_combined_50 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
-  add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120)
+  add_locked_in_constraints(exist_mpas_4) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.000001)
 
 ## Solve problem
 sprob_combined_50 <- solve(prob_combined_50)
 ## Plot the solution to see what it looks like
 plot(sprob_combined_50,  main = c("combined- 50% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_50, here("final_results", "scenario_4_combined", "sprob_combined_50_6hr_blm0.000001.tif"), overwrite = TRUE)
 ```
 
 
