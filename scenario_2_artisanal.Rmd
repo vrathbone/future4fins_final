@@ -125,19 +125,20 @@ writeRaster(sprob_artisanal_10, here("final_results", "scenario_2_artisanal", "s
 ### OBJECTIVE: Minimize area while meeting 50% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
 
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
-prob_artisanal_20 <- problem(cost_artisanal, features = features_stack) %>%
+prob_artisanal_50 <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
-  add_relative_targets(0.2) %>%
+  add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.000001)
 
 ## Solve problem
-sprob_artisanal_20 <- solve(prob_artisanal_20)
+sprob_artisanal_50 <- solve(prob_artisanal_50)
 ## Plot the solution to see what it looks like
-plot(sprob_artisanal_20,  main = c("Artisanal- 20% Targets"))
+plot(sprob_artisanal_50,  main = c("Artisanal- 50% Targets"))
 
 #Save plot
-writeRaster(sprob_artisanal_20, here("final_results", "scenario_2_artisanal", "sprob_artisanal_20_6hr_blm0.tif"), overwrite = TRUE)
+writeRaster(sprob_artisanal_50, here("final_results", "scenario_2_artisanal", "sprob_artisanal_50_6hr_blm0.000001.tif"), overwrite = TRUE)
 ```
 
 **Changing BLM with constant target (20%)**
