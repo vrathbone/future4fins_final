@@ -83,7 +83,7 @@ prob_artisanal_20 <- problem(cost_artisanal, features = features_stack) %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(1)
+  add_boundary_penalties(0.000001)
 
 ## Solve problem
 sprob_artisanal_20 <- solve(prob_artisanal_20)
@@ -92,7 +92,7 @@ plot(sprob_artisanal_20,  main = c("Artisanal- 20% Targets"))
 
 #Save plot
 
-writeRaster(sprob_artisanal_20, here("final_results", "sprob_artisanal_20_tl21600_blm1.tif"), overwrite = TRUE)
+writeRaster(sprob_artisanal_20, here("final_results", "scenario_2_artisanal", "sprob_artisanal_20_6hr_blm0.000001.tif"), overwrite = TRUE)
 
 ```
 
@@ -107,7 +107,8 @@ prob_artisanal_10 <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.000001)
 
 ## Solve problem
 sprob_artisanal_10 <- solve(prob_artisanal_10)
@@ -115,7 +116,7 @@ sprob_artisanal_10 <- solve(prob_artisanal_10)
 plot(sprob_artisanal_10,  main = c("Artisanal- 10% Targets"))
 
 #Save plot
-writeRaster(sprob_artisanal_10, here("final_results", "scenario_2_artisanal", "sprob_artisanal_10_6hr_blm0.tif"), overwrite = TRUE)
+writeRaster(sprob_artisanal_10, here("final_results", "scenario_2_artisanal", "sprob_artisanal_10_6hr_blm0.000001.tif"), overwrite = TRUE)
 
 ```
 
