@@ -16,6 +16,7 @@ library(janitor)
 library(prioritizr)
 library(rgdal)
 library(gurobi)
+library(patchwork)
 
 ```
 
@@ -336,36 +337,48 @@ shapefile(blm0.000002_sf, here("set_up", "blm_sensitivity", "blm52"))
 ## BLM optimization curve plot
 ```{r}
 #read in csv
-blm_sensitivity <- read_csv(here("set_up", "blm_sensitivity", "blm_sensitivity_values.csv"))
+blm_sensitivity_all <- read_csv(here("set_up", "blm_sensitivity", "blm_sensitivity_values.csv"))
 
-# plot it - average area
-ggplot(data = blm_sensitivity, aes(x = area_avg_km2, y = perimeter_sum_km)) +
+blm_sensitivity_1 <- blm_sensitivity_all %>% 
+  filter(round == "1")
+
+# plot it - average area - first round
+ggplot(data = blm_sensitivity_1, aes(x = area_avg_km2, y = perimeter_sum_km)) +
   geom_point() +
   geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
   geom_line() +
   labs(x = "Average Area (km2)",
        y = "Boundary Length Sum (km)",
-       title = "BLM Sensitivity Analysis") +
-  geom_smooth()
+       title = "Boundary Penalty Sensitivity Analysis")
+
+# plot it - average area - with honed in values
+ggplot(data = blm_sensitivity_all, aes(x = area_avg_km2, y = perimeter_sum_km)) +
+  geom_point() +
+  geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
+  geom_line() +
+  labs(x = "Average Area (km2)",
+       y = "Boundary Length Sum (km)",
+       title = "Boundary Penalty Sensitivity Analysis")
+
 
 # plot it - total area
-ggplot(data = blm_sensitivity, aes(x = total_area_km2, y = perimeter_sum_km)) +
-  geom_point() +
-  geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
-  geom_line() +
-  labs(x = "Total Area (km2)",
-       y = "Boundary Length Sum (km)",
-       title = "BLM Sensitivity Analysis - Total Area")
-
-# plot it - perimeter to area
-ggplot(data = blm_sensitivity, aes(x = perimeter_sum_km, y = total_area_km2)) +
-#ggplot(data = blm_sensitivity, aes(x = total_area_km2 , y = perimeter_sum_km)) +
-  geom_point() +
-  geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
-  geom_line() +
-  labs(x = "Total Area (km2)",
-       y = "Boundary Length Sum (km)",
-       title = "BLM Sensitivity Analysis - Total Area")
+# ggplot(data = blm_sensitivity, aes(x = total_area_km2, y = perimeter_sum_km)) +
+#   geom_point() +
+#   geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
+#   geom_line() +
+#   labs(x = "Total Area (km2)",
+#        y = "Boundary Length Sum (km)",
+#        title = "BLM Sensitivity Analysis - Total Area")
+# 
+# # plot it - perimeter to area
+# ggplot(data = blm_sensitivity, aes(x = perimeter_sum_km, y = total_area_km2)) +
+# #ggplot(data = blm_sensitivity, aes(x = total_area_km2 , y = perimeter_sum_km)) +
+#   geom_point() +
+#   geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
+#   geom_line() +
+#   labs(x = "Total Area (km2)",
+#        y = "Boundary Length Sum (km)",
+#        title = "BLM Sensitivity Analysis - Total Area")
 
 ```
 
