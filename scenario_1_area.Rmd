@@ -84,6 +84,19 @@ plot(sprob_area_20,  main = c("Area- 20% Targets"))
 writeRaster(sprob_area_20, here("final_results", "scenario_1_area",  "sprob_area_20_6hr_blm0.tif"), overwrite = TRUE)
 ```
 
+Final plot - reading in
+```{r}
+## read in scenario if already saved (so don't have to run model again)
+area_20_6hr_blm0 <- raster(here("final_results", "scenario_1_area", "sprob_area_20_6hr_blm0.tif"))
+plot(area_20_6hr_blm0)
+
+area_20_6hr_blm0_df <- area_20
+
+ggplot()+
+  geom_raster(data = area_20_6hr_blm0)
+```
+
+
 
 #### SCENARIO 2: Baseline - 10% target, Boundary Penalty = 0 
 ```{r}
