@@ -89,28 +89,43 @@ ggplot()+
 
 Made the middle ground values (0.1-0.2) or yellow in our Arc Maps the highest values (can't remember if it should be the highest or lowest but it's an easy switch).
 ```{r}
-## change values
-combined_bell_curve <- combined_stack_sum_df %>% 
-  rename(pressure = layer) %>% 
-  mutate(bell_curve_pressure = case_when(pressure <= 0.02 ~ 1,
-                                         pressure > 0.02 & pressure <= 0.1 ~ 3,
-                                         pressure > 0.1 & pressure <= 0.2 ~ 5,
-                                         pressure > 0.2 & pressure <= 0.44 ~ 4,
-                                         pressure > 0.44 ~ 2)) %>% 
-  mutate(id = 1:n())
+m <- c(0.00, 0.02, 4,    
+       0.02, 0.1, 2,    
+       0.1, 0.2, 1,
+       0.2, 0.44, 3,
+       0.44, 1.00, 5)
 
+### wrap the vector into a matrix by rows
+rcl_mtx <- matrix(m, ncol=3, byrow=TRUE)
+
+combined_reclass <- reclassify(combined_stack_sum, rcl_mtx)
+plot(combined_reclass)
+
+combined_reclass_df <- rasterToPoints(combined_reclass) %>% 
+  as.data.frame()
+
+## change values
+# combined_bell_curve <- combined_stack_sum_df %>% 
+#   rename(pressure = layer) %>% 
+#   mutate(bell_curve_pressure = case_when(pressure <= 0.02 ~ 1,
+#                                          pressure > 0.02 & pressure <= 0.1 ~ 3,
+#                                          pressure > 0.1 & pressure <= 0.2 ~ 5,
+#                                          pressure > 0.2 & pressure <= 0.44 ~ 4,
+#                                          pressure > 0.44 ~ 2)) %>% 
+#   mutate(id = 1:n())
+# 
 ggplot()+
-  geom_raster(data = combined_bell_curve, aes(x,y, fill = bell_curve_pressure))+
+  geom_raster(data = combined_reclass_df, aes(x,y, fill = layer))+
   geom_sf(data = mz_eez_sf, fill = NA)+
   scale_fill_continuous(type = "viridis")
 ```
 
 NOT WORKING...
 ```{r}
-## make raster
-combined_bell_curve_raster <- raster::subs(mz_rast_id, combined_bell_curve, by = 'id', which = 'bell_curve_pressure')
-
-plot(combined_bell_curve_raster)
+# ## make raster
+# combined_bell_curve_raster <- raster::subs(mz_rast_id, combined_bell_curve, by = 'id', which = 'bell_curve_pressure')
+# 
+# plot(combined_bell_curve_raster)
 ```
 
 
