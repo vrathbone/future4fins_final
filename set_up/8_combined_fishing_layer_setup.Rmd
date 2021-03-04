@@ -118,17 +118,34 @@ ggplot()+
   geom_raster(data = combined_reclass_df, aes(x,y, fill = layer))+
   geom_sf(data = mz_eez_sf, fill = NA)+
   scale_fill_continuous(type = "viridis")
+
+writeRaster(combined_reclass, here('set_up/final_rasters/costs/combined_reclass.tif'), 
+            overwrite = TRUE)
 ```
 
-NOT WORKING...
 ```{r}
-# ## make raster
-# combined_bell_curve_raster <- raster::subs(mz_rast_id, combined_bell_curve, by = 'id', which = 'bell_curve_pressure')
-# 
-# plot(combined_bell_curve_raster)
+m_dist <- c(0.00, 0.02, NA,    
+       0.02, 0.1, NA,    
+       0.1, 0.2, 1,
+       0.2, 0.44, NA,
+       0.44, 1.00, NA)
+
+### wrap the vector into a matrix by rows
+rcl_mtx_dist <- matrix(m_dist, ncol=3, byrow=TRUE)
+
+combined_reclass_dist <- reclassify(combined_stack_sum, rcl_mtx_dist)
+plot(combined_reclass_dist)
+
+## use the raster::distance() function, which calculates a distance for every NA cell to the nearest non-NA cell.
+combined_dist_rast <- raster::distance(combined_reclass_dist) %>% 
+  mask(mz_eez_sf) # mask so the land distances are not calculated
+
+## plot it!
+plot(combined_dist_rast)
+
+### save it
+writeRaster(combined_dist_rast, here('set_up/final_rasters/costs/combined_dist_rast.tif'), overwrite = TRUE)
 ```
-
-
 
 
 
