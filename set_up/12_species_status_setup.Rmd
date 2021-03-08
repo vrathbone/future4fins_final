@@ -1,0 +1,143 @@
+---
+title: "species_status"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(raster)
+library(tidyverse)
+library(here)
+library(janitor)
+library(rredlist)
+library(jsonlite)
+```
+
+
+
+To find the different rredlist commands use the IUCN API reference page: https://apiv3.iucnredlist.org/api/v3/docs
+
+IUCN. (2018). The IUCN Red List of threatened species. Version 2018-1. Retrieved from http://www.iucnredlist.org
+
+**Sidenote: You'll need the API code to run this part. DO NOT SHARE THE API CODE ON GITHUB!! I obtained the IUCN API code from Tidy Tuesday and we aren't supposed to share it. When you run the code let me know and I'll send you the code chunk.**  
+
+Using the rredlist search by country command and converting to dataframe
+```{r}
+#listing every species in MZ by the scientific name, id, etc.
+mz_species <- rl_sp_country('MZ', parse = TRUE, key = apikey)
+
+#convert from list to dataframe using JSON
+mz_species_df <- jsonlite::fromJSON(rl_sp_country_('MZ', key = apikey)) %>% 
+  as.data.frame %>% 
+  rename(id_no = result.taxonid, species = result.scientific_name) %>% 
+  select(species, result.category)
+
+```
+
+```{r}
+species <- tribble(
+  ~species_names,
+  "Alopias pelagicus",
+                 "Alopias superciliosus",
+                 "Alopias vulpinus",
+                 "Carcharhinus amblyrhynchos",
+                 "Carcharhinus longimanus",
+                 "Carcharhinus obscurus",
+                 "Carcharodon carcharias",
+                 "Isurus oxyrinchus",
+                 "Isurus paucus",
+                 "Carcharias taurus",
+                 "Rhincodon typus",
+                 "Sphyrna lewini",
+                 "Sphyrna mokarran",
+                 "Sphyrna zygaena",
+                 "Stegostoma tigrinum",
+                 "Mobula alfredi",
+                 "Mobula birostris",
+                 "Mobula kuhlii",
+                 "Mobula mobular",
+                 "Pristis pristis",
+                 "Pristis zijsron",
+                 "Rostroraja alba",
+                 "Rhina ancylostoma",
+                 "Acroteriobatus leucospilus",
+                 "Pseudoginglymostoma brevicaudatum",
+                 "Rhynchobatus australiae",
+                 "Rhynchobatus djiddensis"
+) %>% 
+  mutate(iucn_pull = map(species_names, rl_search, key = apikey))
+
+species_status <- species %>% 
+  mutate(category = map_chr(iucn_pull, pluck, "result", "category"))
+
+risk_df <- species_status  %>% 
+  mutate(risk_level = case_when(category == "CR" ~3,
+                          category == "EN" ~2,
+                          category == "VU"~ 1))
+
+
+### create dataframe that only contains species and changes to correct crs
+thresher_shark <- iucn_sf %>% 
+  rename(species_names = binomial) %>% 
+  filter(species_names == "Alopias pelagicus") %>% 
+  st_transform(., crs = st_crs(mz_eez_sf))
+
+thresher_shark_merge <- merge(thresher_shark, risk_df, by = "species_names") %>% 
+  mutate(new_risk = (presence * risk_level))
+
+### check crs to make sure it matches
+st_crs(thresher_shark)
+
+### create a raster
+thresher_shark_rast <- fasterize::fasterize(thresher_shark, mz_rast_id) %>%
+  mask(mz_eez_sf)
+
+### plot to see how it looks
+plot(thresher_shark_rast)
+
+
+### made all NA = 0 (not sure if this makes a difference)
+thresher_shark_rast[is.na(thresher_shark_rast[])] <- 0
+plot(thresher_shark_rast)
+
+### masked it to make all values outside the eez = NA
+thresher_shark_rast <- mask(thresher_shark_rast, mz_eez_sf)
+plot(thresher_shark_rast)
+
+```
+
+```{r}
+## pull in species stack we created in step 2
+species_stack <- brick(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
+
+## Create data frame to check it out
+species_stack_df <- rasterToPoints(species_stack) %>% as.data.frame()
+```
+
+```{r}
+create_rast_status <- function(iucn_sf, species_name){
+  # outfile <- sprintf(here('set_up/final_rasters/conservation_features/iucn_species/species_%s.tif'), species_name)
+  # message('Processing species ', species_name, ' to create file ', outfile)
+
+  species_df <- iucn_sf %>%
+  filter(binomial == species_name) %>% 
+  st_transform(., crs = st_crs(mz_eez_sf))
+
+species_rast <- fasterize::fasterize(species_df, mz_rast_id) %>% 
+  mask(mz_eez_sf)
+
+# writeRaster(species_rast, filename = outfile, overwrite = TRUE)
+# 
+# return('yay it works')
+
+}
+```
+
+
+
+
+
+
+
+
