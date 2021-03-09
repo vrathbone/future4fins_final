@@ -6,39 +6,108 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+#load packages
 library(raster)
 library(tidyverse)
+library(sf)
 library(here)
+library(fasterize)
+library(stringr)
 library(janitor)
-library(rredlist)
-library(jsonlite)
+library(fasterize)
 ```
 
-
-
-To find the different rredlist commands use the IUCN API reference page: https://apiv3.iucnredlist.org/api/v3/docs
 
 IUCN. (2018). The IUCN Red List of threatened species. Version 2018-1. Retrieved from http://www.iucnredlist.org
 
-**Sidenote: You'll need the API code to run this part. DO NOT SHARE THE API CODE ON GITHUB!! I obtained the IUCN API code from Tidy Tuesday and we aren't supposed to share it. When you run the code let me know and I'll send you the code chunk.**  
-
-Using the rredlist search by country command and converting to dataframe
+#### **STEP 1: Read in Mozambique EEZ and Shapefile**
 ```{r}
-#listing every species in MZ by the scientific name, id, etc.
-mz_species <- rl_sp_country('MZ', parse = TRUE, key = apikey)
+## read in MZ EEZ tif
+mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"))
+plot(mz_rast_id)
 
-#convert from list to dataframe using JSON
-mz_species_df <- jsonlite::fromJSON(rl_sp_country_('MZ', key = apikey)) %>% 
-  as.data.frame %>% 
-  rename(id_no = result.taxonid, species = result.scientific_name) %>% 
-  select(species, result.category)
+## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
+mz_eez_path <- 'G:/group_project/data/mz_eez'
+mz_shape <- list.files(mz_eez_path, full.names = TRUE) 
+
+mz_eez_sf <- sf::read_sf(mz_shape[6])
+
+## check coordinate system
+st_crs(mz_eez_sf)
+
+## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
+#mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
+```
+
+#### **STEP 2: Read in IUCN CHONDRICHTHYES Shapefiles**
+```{r}
+### grab iucn data from local computer
+iucn_path <- 'G:/group_project/data/updated_iucn'
+iucn_shape <- list.files(iucn_path, full.names = TRUE) 
+
+iucn_sf <- sf::read_sf(iucn_shape[9])
+
+### create a dataframe to look at the different variables and remove geometry to speed it up
+iucn_df <- iucn_sf %>%
+  as.data.frame() %>% 
+  select(-geometry)
+
+```
+
+
+
+```{r}
+### reclassify status
+risk_df <- iucn_sf  %>% 
+  mutate(risk_level = case_when(category == "CR" ~3,
+                          category == "EN" ~2,
+                          category == "VU"~ 1))
+
+
+### create dataframe that only contains species and changes to correct crs
+thresher_shark <- risk_df %>%
+  filter(binomial == "Alopias pelagicus") %>% 
+  st_transform(., crs = st_crs(mz_eez_sf)) 
+
+### check crs to make sure it matches
+st_crs(thresher_shark)
+
+### create a raster
+thresher_shark_rast <- fasterize::fasterize(thresher_shark, mz_rast_id, field = "risk_level") %>%
+  mask(mz_eez_sf)
+
+### plot to see how it looks
+plot(thresher_shark_rast)
+
+```
+
+
+```{r}
+create_rast_status <- function(risk_df, species_name){
+  outfile <- sprintf(here('set_up/final_rasters/conservation_features/iucn_species_status/species_%s.tif'), species_name)
+  message('Processing species ', species_name, ' to create file ', outfile)
+
+  species_df <- risk_df %>%
+  filter(binomial == species_name) %>% 
+  st_transform(., crs = st_crs(mz_eez_sf))
+
+species_rast <- fasterize::fasterize(species_df, mz_rast_id, field = "risk_level") %>% 
+  mask(mz_eez_sf)
+
+writeRaster(species_rast, filename = outfile, overwrite = TRUE)
+
+return('yay it works')
+
+}
+
+# dusky_shark_rast <- create_rast_status(risk_df, "Carcharhinus obscurus")
+# plot(dusky_shark_rast)
 
 ```
 
 ```{r}
-species <- tribble(
-  ~species_names,
-  "Alopias pelagicus",
+### create vector 
+species_name <- c("Alopias pelagicus",
                  "Alopias superciliosus",
                  "Alopias vulpinus",
                  "Carcharhinus amblyrhynchos",
@@ -61,82 +130,32 @@ species <- tribble(
                  "Pristis zijsron",
                  "Rostroraja alba",
                  "Rhina ancylostoma",
-                 "Acroteriobatus leucospilus",
-                 "Pseudoginglymostoma brevicaudatum",
-                 "Rhynchobatus australiae",
-                 "Rhynchobatus djiddensis"
-) %>% 
-  mutate(iucn_pull = map(species_names, rl_search, key = apikey))
-
-species_status <- species %>% 
-  mutate(category = map_chr(iucn_pull, pluck, "result", "category"))
-
-risk_df <- species_status  %>% 
-  mutate(risk_level = case_when(category == "CR" ~3,
-                          category == "EN" ~2,
-                          category == "VU"~ 1))
-
-
-### create dataframe that only contains species and changes to correct crs
-thresher_shark <- iucn_sf %>% 
-  rename(species_names = binomial) %>% 
-  filter(species_names == "Alopias pelagicus") %>% 
-  st_transform(., crs = st_crs(mz_eez_sf))
-
-thresher_shark_merge <- merge(thresher_shark, risk_df, by = "species_names") %>% 
-  mutate(new_risk = (presence * risk_level))
-
-### check crs to make sure it matches
-st_crs(thresher_shark)
-
-### create a raster
-thresher_shark_rast <- fasterize::fasterize(thresher_shark, mz_rast_id) %>%
-  mask(mz_eez_sf)
-
-### plot to see how it looks
-plot(thresher_shark_rast)
-
-
-### made all NA = 0 (not sure if this makes a difference)
-thresher_shark_rast[is.na(thresher_shark_rast[])] <- 0
-plot(thresher_shark_rast)
-
-### masked it to make all values outside the eez = NA
-thresher_shark_rast <- mask(thresher_shark_rast, mz_eez_sf)
-plot(thresher_shark_rast)
-
+                 "Acroteriobatus leucospilus")
 ```
 
 ```{r}
-## pull in species stack we created in step 2
-species_stack <- brick(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
-
-## Create data frame to check it out
-species_stack_df <- rasterToPoints(species_stack) %>% as.data.frame()
-```
-
-```{r}
-create_rast_status <- function(iucn_sf, species_name){
-  # outfile <- sprintf(here('set_up/final_rasters/conservation_features/iucn_species/species_%s.tif'), species_name)
-  # message('Processing species ', species_name, ' to create file ', outfile)
-
-  species_df <- iucn_sf %>%
-  filter(binomial == species_name) %>% 
-  st_transform(., crs = st_crs(mz_eez_sf))
-
-species_rast <- fasterize::fasterize(species_df, mz_rast_id) %>% 
-  mask(mz_eez_sf)
-
-# writeRaster(species_rast, filename = outfile, overwrite = TRUE)
-# 
-# return('yay it works')
-
+### create loop 
+for (i in seq_along(species_name)) {
+  create_rast_status(risk_df, species_name[i])
 }
 ```
 
+#### **STEP 8: Creating Species Stack** --must clear environment to run this chuck...
+```{r}
+### create file path to read in all 30 species tifs in 
+species_status_path <- here("set_up", "final_rasters", "conservation_features", "iucn_species_status")
+species_status_files <- list.files(species_status_path, full.names = TRUE)
 
+### stack them (this includes the three that we manually created and saved in the same IUCN folder)
+species_status_stack <- stack(species_status_files)
 
+### plot to see how they look and make a data frame to double check
+plot(species_status_stack)
+species_status_stack_df <- as.data.frame(species_status_stack)
 
+### write raster
+writeRaster(species_status_stack, here('set_up/final_rasters/conservation_features/iucn_species_status/species_status_stack.tif'), options="INTERLEAVE=BAND",  overwrite = TRUE)
+```
 
 
 
