@@ -80,11 +80,34 @@ exist_aggs <- raster(here("set_up", "final_rasters", "planning_unit", "aggregati
 plot(exist_aggs)
 ```
 
-## **STEP 2: Run Some combined Fishing Scenarios!**
+## **STEP 2: Run Some combined Fishing Scenarios with no boundary penalty**
 
 **Changing the targets!**
 
-#### SCENARIO 1: combined - 20% target, Boundary Penalty = 0,  
+#### RUN 1: combined - 10% target, Boundary Penalty = 0 
+```{r}
+### OBJECTIVE: Minimize area while meeting 10% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+prob_combined_10 <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.1) %>%
+  add_locked_in_constraints(exist_mpas) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120)
+
+## Solve problem
+sprob_combined_10 <- solve(prob_combined_10)
+
+## Plot the solution to see what it looks like
+plot(sprob_combined_10,  main = c("combined- 10% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_10, here("final_results", "scenario_4_combined", "sprob_combined_10_6hr_blm0.tif"), overwrite = TRUE)
+
+```
+
+
+#### RUN 2: combined - 20% target, Boundary Penalty = 0,  
 ```{r}
 ### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0
 
@@ -99,27 +122,147 @@ prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
 sprob_combined_20 <- solve(prob_combined_20)
 ## Plot the solution to see what it looks like
 plot(sprob_combined_20,  main = c("combined- 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20, here("final_results", "scenario_4_combined", "sprob_combined_20_6hr_blm0.tif"), overwrite = TRUE)
+
 ```
 
-#### SCENARIO 2: combined - 10% target, Boundary Penalty = 0 
+#### RUN 3: combined - 30% target, Boundary Penalty = 0,  
 ```{r}
-### OBJECTIVE: Minimize area while meeting 10% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
+### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0
 
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
-prob_combined_10 <- problem(cost_combined, features = features_stack) %>%
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_30 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
-  add_relative_targets(0.1) %>%
-  add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120)
+  add_relative_targets(0.3) %>%
+  add_locked_in_constraints(exist_mpas_4) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120) 
 
 ## Solve problem
-sprob_combined_10 <- solve(prob_combined_10)
+sprob_combined_30 <- solve(prob_combined_30)
 ## Plot the solution to see what it looks like
-plot(sprob_combined_10,  main = c("combined- 10% Targets"))
+plot(sprob_combined_30,  main = c("combined- 30% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_30, here("final_results", "scenario_4_combined", "sprob_combined_30_6hr_blm0.tif"), overwrite = TRUE)
+
 ```
 
 
-#### SCENARIO 3: combined - 50% target, Boundary Penalty = 0 
+#### RUN 4: combined - 50% target, Boundary Penalty = 0,  
+```{r}
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_50 <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.5) %>%
+  add_locked_in_constraints(exist_mpas_4) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120) 
+
+## Solve problem
+sprob_combined_50 <- solve(prob_combined_50)
+## Plot the solution to see what it looks like
+plot(sprob_combined_50,  main = c("combined- 50% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_50, here("final_results", "scenario_4_combined", "sprob_combined_50_6hr_blm0.tif"), overwrite = TRUE)
+
+```
+
+
+
+***
+
+## **STEP 3: Run Some Industrial Fishing Scenarios with efficient boundary penalty (1x10^-6)**
+
+#### Run 5: Industrial - 10% target, Boundar Penaly = 0.000001
+```{r}
+### OBJECTIVE: Minimize industrial fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_10_blm <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.1) %>%
+  add_locked_in_constraints(exist_mpas_3) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
+  add_boundary_penalties(0.000001)
+
+## Solve problem
+sprob_combined_10_blm <- solve(prob_combined_10_blm)
+
+## Plot the solution to see what it looks like
+plot(sprob_combined_10_blm,  main = c("combined - 10% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_10_blm, here("final_results", "scenario_4_combined", "sprob_combined_10_6hr_blm0.000001.tif"), overwrite = TRUE)
+```
+
+
+#### RUN 6: Industrial - 20% target, Boundary Penalty = 0.000001 
+```{r}
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_20_blm <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas_3) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
+  add_boundary_penalties(0.000001)
+
+## Solve problem
+sprob_combined_20_blm <- solve(prob_combined_20_blm)
+
+## Plot the solution to see what it looks like
+plot(sprob_combined_20_blm,  main = c("combined - 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20_blm, here("final_results", "scenario_4_combined", "sprob_combined_20_6hr_blm0.000001.tif"), overwrite = TRUE)
+```
+
+#### RUN 7: Industrial - 30% target, Boundary Penalty = 0.000001 
+```{r}
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_30_blm <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.3) %>%
+  add_locked_in_constraints(exist_mpas_3) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
+  add_boundary_penalties(0.000001)
+
+## Solve problem
+sprob_combined_30_blm <- solve(prob_combined_30_blm)
+
+## Plot the solution to see what it looks like
+plot(sprob_combined_30_blm,  main = c("combined- 30% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_30_blm, here("final_results", "scenario_4_combined", "sprob_combined_30_6hr_blm0.000001.tif"), overwrite = TRUE)
+```
+
+#### RUN 8: Industrial - 50% target, Boundary Penalty = 0.000001 
+```{r}
+### OBJECTIVE: Minimize industrial fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_50_blm <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.5) %>%
+  add_locked_in_constraints(exist_mpas_3) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
+  add_boundary_penalties(0.000001)
+
+## Solve problem
+sprob_combined_50_blm <- solve(prob_combined_50_blm)
+
+## Plot the solution to see what it looks like
+plot(sprob_combined_50_blm,  main = c("combined- 50% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_50_blm, here("final_results", "scenario_4_combined", "sprob_combined_50_6hr_blm0.000001.tif"), overwrite = TRUE)
+```
+
+Other sensitivity analysis:
+
 ```{r}
 ### OBJECTIVE: Minimize area while meeting 50% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
 
@@ -141,250 +284,5 @@ plot(sprob_combined_20,  main = c("combined- 20% Targets"))
 #Save plot
 writeRaster(sprob_combined_20, here("final_results", "sensitivity", "sprob_combined_20_6hr_blm0_aggsites.tif"), overwrite = TRUE)
 ```
-
-
-
-***
-
-## BLM Sensitivity Analysis
-
-##1 Royal Penguin
-#### BLM: 0.01, Combined, 20% Target, MPAs locked in - 20% target, 6hr time limit
-```{r}
-### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0.0000001
-
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
-prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
-  add_min_set_objective() %>%
-  add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_4) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000003)
-
-## Solve problem
-sprob_combined_20 <- solve(prob_combined_20)
-## Plot the solution to see what it looks like
-plot(sprob_combined_20,  main = c("combined- 20% Targets"))
-
-#Save plot
-writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.000003.tif"), overwrite = TRUE)
-
-```
-
-##2 Islay
-#### BLM: .01, Combined, 20% Target, MPAs locked in - 20% target, 6hr time limit
-```{r}
-### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0.0000001
-
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
-prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
-  add_min_set_objective() %>%
-  add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_4) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000002)
-
-## Solve problem
-sprob_combined_20 <- solve(prob_combined_20)
-## Plot the solution to see what it looks like
-plot(sprob_combined_20,  main = c("combined- 20% Targets"))
-
-#Save plot
-writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.000002.tif"), overwrite = TRUE)
-
-```
-
-##3 Dugong
-#### BLM: .0001, Combined, 20% Target, MPAs locked in - 20% target, 6hr time limit
-```{r}
-### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0.0000001
-
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
-prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
-  add_min_set_objective() %>%
-  add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_4) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000007)
-
-## Solve problem
-sprob_combined_20 <- solve(prob_combined_20)
-## Plot the solution to see what it looks like
-plot(sprob_combined_20,  main = c("combined- 20% Targets"))
-
-#Save plot
-writeRaster(sprob_combined_20, here("final_results", "sprob_combined_20_6hr_blm0.000007.tif"), overwrite = TRUE)
-
-```
-
-##4 Mason
-#### BLM: .0001, Combined, 20% Target, MPAs locked in - 20% target, 6hr time limit
-```{r}
-### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0.0000001
-
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
-prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
-  add_min_set_objective() %>%
-  add_relative_targets(0.2) %>%
-  #add_locked_in_constraints(exist_mpas_4) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) 
-  #add_boundary_penalties(0.0001)
-
-## Solve problem
-sprob_combined_20 <- solve(prob_combined_20)
-## Plot the solution to see what it looks like
-plot(sprob_combined_20,  main = c("combined- 20% Targets"))
-
-#Save plot
-writeRaster(sprob_combined_20, (here("final_results", "sprob_combined_20_6hr_blm0_no-mpas.tif")), overwrite = TRUE)
-
-```
-
-## Convert tifs to shapefiles to extract BLM data
-```{r}
-#BLM 0
-blm0 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.tif"))
-blm0_sf <- rasterToPolygons(blm0, fun = function(sprob_combined_20_6hr_blm0){sprob_combined_20_6hr_blm0==1})
-plot(blm0_sf)
-shapefile(blm0_sf, here("set_up", "blm_sensitivity", "blm0"))
-
-#BLM 0.000000001
-blm0.000000001 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000000001.tif"))
-blm0.000000001_sf <- rasterToPolygons(blm0.000000001, fun = function(sprob_combined_20_6hr_blm0.000000001){sprob_combined_20_6hr_blm0.000000001==1})
-plot(blm0.000000001_sf)
-shapefile(blm0.000000001_sf, here("set_up", "blm_sensitivity", "blm81"))
-
-#BLM 0.00000001
-blm0.00000001 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.00000001.tif"))
-blm0.00000001_sf <- rasterToPolygons(blm0.00000001, fun = function(sprob_combined_20_6hr_blm0.00000001){sprob_combined_20_6hr_blm0.00000001==1})
-plot(blm0.00000001_sf)
-shapefile(blm0.00000001_sf, here("set_up", "blm_sensitivity", "blm71"))
-
-#BLM 0.0000001
-blm0.0000001 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.0000001.tif"))
-blm0.0000001_sf <- rasterToPolygons(blm0.0000001, fun = function(sprob_combined_20_6hr_blm0.0000001){sprob_combined_20_6hr_blm0.0000001==1})
-plot(blm0.0000001_sf)
-shapefile(blm0.0000001_sf, here("set_up", "blm_sensitivity", "blm61"))
-
-#BLM 0.000001
-blm0.000001 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000001.tif"))
-blm0.000001_sf <- rasterToPolygons(blm0.000001, fun = function(sprob_combined_20_6hr_blm0.000001){sprob_combined_20_6hr_blm0.000001==1})
-plot(blm0.000001_sf)
-shapefile(blm0.000001_sf, here("set_up", "blm_sensitivity", "blm51"))
-
-#BLM 0.00001
-blm0.00001 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.00001.tif"))
-blm0.00001_sf <- rasterToPolygons(blm0.00001, fun = function(sprob_combined_20_6hr_blm0.00001){sprob_combined_20_6hr_blm0.00001==1})
-plot(blm0.00001_sf)
-shapefile(blm0.00001_sf, here("set_up", "blm_sensitivity", "blm41"))
-
-#BLM 0.0001
-blm0.0001 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.0001.tif"))
-blm0.0001_sf <- rasterToPolygons(blm0.0001, fun = function(sprob_combined_20_6hr_blm0.0001){sprob_combined_20_6hr_blm0.0001==1})
-plot(blm0.0001_sf)
-shapefile(blm0.0001_sf, here("set_up", "blm_sensitivity", "blm31"))
-
-#BLM 0.001
-blm0.001 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.001.tif"))
-blm0.001_sf <- rasterToPolygons(blm0.001, fun = function(sprob_combined_20_6hr_blm0.001){sprob_combined_20_6hr_blm0.001==1})
-plot(blm0.001_sf)
-shapefile(blm0.001_sf, here("set_up", "blm_sensitivity", "blm21"))
-
-#BLM 0.01
-blm0.01 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.01.tif"))
-blm0.01_sf <- rasterToPolygons(blm0.01, fun = function(sprob_combined_20_6hr_blm0.01){sprob_combined_20_6hr_blm0.01==1})
-plot(blm0.01_sf)
-shapefile(blm0.01_sf, here("set_up", "blm_sensitivity", "blm11"))
-
-#BLM 0.1
-blm0.1 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.1.tif"))
-blm0.1_sf <- rasterToPolygons(blm0.1, fun = function(sprob_combined_20_6hr_blm0.1){sprob_combined_20_6hr_blm0.1==1})
-plot(blm0.1_sf)
-shapefile(blm0.1_sf, here("set_up", "blm_sensitivity", "blm01"))
-
-#BLM 1
-blm1 <- raster(here("final_results", "sprob_combined_20_6hr_blm1.tif"))
-blm1_sf <- rasterToPolygons(blm1, fun = function(sprob_combined_20_6hr_blm1){sprob_combined_20_6hr_blm1==1})
-plot(blm1_sf)
-shapefile(blm1_sf, here("set_up", "blm_sensitivity", "blm1"))
-
-#BLM 0.000003
-blm0.000003 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000003.tif"))
-blm0.000003_sf <- rasterToPolygons(blm0.000003, fun = function(sprob_combined_20_6hr_blm0.000003){sprob_combined_20_6hr_blm0.000003==1})
-plot(blm0.000003_sf)
-shapefile(blm0.000003_sf, here("set_up", "blm_sensitivity", "blm53"))
-
-#BLM 0.000005
-blm0.000005 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000005.tif"))
-blm0.000005_sf <- rasterToPolygons(blm0.000005, fun = function(sprob_combined_20_6hr_blm0.000005){sprob_combined_20_6hr_blm0.000005==1})
-plot(blm0.000005_sf)
-shapefile(blm0.000005_sf, here("set_up", "blm_sensitivity", "blm55"))
-
-#BLM 0.000007
-blm0.000007 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000007.tif"))
-blm0.000007_sf <- rasterToPolygons(blm0.000007, fun = function(sprob_combined_20_6hr_blm0.000007){sprob_combined_20_6hr_blm0.000007==1})
-plot(blm0.000007_sf)
-shapefile(blm0.000007_sf, here("set_up", "blm_sensitivity", "blm57"))
-
-#BLM 0.000002
-blm0.000002 <- raster(here("final_results", "sprob_combined_20_6hr_blm0.000002.tif"))
-blm0.000002_sf <- rasterToPolygons(blm0.000002, fun = function(sprob_combined_20_6hr_blm0.000002){sprob_combined_20_6hr_blm0.000002==1})
-plot(blm0.000002_sf)
-shapefile(blm0.000002_sf, here("set_up", "blm_sensitivity", "blm52"))
-
-```
-
-## BLM optimization curve plot
-```{r}
-#read in csv
-blm_sensitivity_all <- read_csv(here("set_up", "blm_sensitivity", "blm_sensitivity_values.csv"))
-
-blm_sensitivity_1 <- blm_sensitivity_all %>% 
-  filter(round == "1")
-
-# plot it - average area - first round
-ggplot(data = blm_sensitivity_1, aes(x = area_avg_km2, y = perimeter_sum_km)) +
-  geom_point() +
-  geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
-  geom_line() +
-  labs(x = "Average Area (km2)",
-       y = "Boundary Length Sum (km)",
-       title = "Boundary Penalty Sensitivity Analysis")
-
-# plot it - average area - with honed in values
-ggplot(data = blm_sensitivity_all, aes(x = area_avg_km2, y = perimeter_sum_km)) +
-  geom_point() +
-  geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
-  geom_line() +
-  labs(x = "Average Area (km2)",
-       y = "Boundary Length Sum (km)",
-       title = "Boundary Penalty Sensitivity Analysis")
-
-
-# plot it - total area
-# ggplot(data = blm_sensitivity, aes(x = total_area_km2, y = perimeter_sum_km)) +
-#   geom_point() +
-#   geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
-#   geom_line() +
-#   labs(x = "Total Area (km2)",
-#        y = "Boundary Length Sum (km)",
-#        title = "BLM Sensitivity Analysis - Total Area")
-# 
-# # plot it - perimeter to area
-# ggplot(data = blm_sensitivity, aes(x = perimeter_sum_km, y = total_area_km2)) +
-# #ggplot(data = blm_sensitivity, aes(x = total_area_km2 , y = perimeter_sum_km)) +
-#   geom_point() +
-#   geom_text(aes(label = BLM), hjust = 1, vjust = 1) +
-#   geom_line() +
-#   labs(x = "Total Area (km2)",
-#        y = "Boundary Length Sum (km)",
-#        title = "BLM Sensitivity Analysis - Total Area")
-
-```
-
-
-
-
-
 
 

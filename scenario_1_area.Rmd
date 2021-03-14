@@ -140,6 +140,7 @@ writeRaster(sprob_area_50, here("final_results", "scenario_1_area",  "sprob_area
 
 ```
 
+
 #### SCENARIO 1: Baseline - 20% target, Boundary Penalty = 0.000001,  
 ```{r}
 ### OBJECTIVE: Minimize area while meeting 20% representation targets, locking in MPAs, locking out oil rigs, and a boundary penalty of 0
@@ -162,6 +163,25 @@ writeRaster(sprob_area_50, here("final_results", "scenario_1_area",  "sprob_area
 ```
 
 
+#### Baseline -30% target, Boundary Penaly = 0 
+```{r}
+### OBJECTIVE: Minimize area while meeting 30% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
+
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+prob_area_30 <- problem(cost_area, features = features_stack) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+
+## Solve problem
+sprob_area_30 <- solve(prob_area_30)
+## Plot the solution to see what it looks like
+plot(sprob_area_30,  main = c("Area- 30% Targets"))
+
+#Write Raster
+writeRaster(sprob_area_30, here("final_results", "scenario_1_area",  "sprob_area_30_6hr_blm0.tif"), overwrite = TRUE)
+```
 
 
 
