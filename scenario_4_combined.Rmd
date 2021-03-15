@@ -16,8 +16,6 @@ library(janitor)
 library(prioritizr)
 library(rgdal)
 library(gurobi)
-library(patchwork)
-
 ```
 
 ## Scenario 2 - Combined Fishing Pressure 
@@ -64,15 +62,21 @@ exist_mpas_4 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_m
 
 ### plot to make sure it looks okay
 plot(exist_mpas_4)
+```
 
-#KBAs
+
+```{r}
+# Key Biodiversity Areas (KBAs)
 ### read in existing kbas raster
 exist_kbas <- raster(here("set_up", "final_rasters", "planning_unit", "kba.tif"))
 
 ### plot to make sure it looks okay
 plot(exist_kbas)
+```
 
-#Aggregation Sites
+
+```{r}
+# Aggregation Sites
 ### read in existing aggregation sites raster
 exist_aggs <- raster(here("set_up", "final_rasters", "planning_unit", "aggregation_sites.tif"))
 
@@ -109,7 +113,6 @@ writeRaster(sprob_combined_10, here("final_results", "scenario_4_combined", "spr
 
 #### RUN 2: combined - 20% target, Boundary Penalty = 0,  
 ```{r}
-### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0
 
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
@@ -120,18 +123,17 @@ prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
 
 ## Solve problem
 sprob_combined_20 <- solve(prob_combined_20)
+
 ## Plot the solution to see what it looks like
 plot(sprob_combined_20,  main = c("combined- 20% Targets"))
 
-#Save plot
+## Save plot
 writeRaster(sprob_combined_20, here("final_results", "scenario_4_combined", "sprob_combined_20_6hr_blm0.tif"), overwrite = TRUE)
 
 ```
 
 #### RUN 3: combined - 30% target, Boundary Penalty = 0,  
 ```{r}
-### OBJECTIVE: Minimize combined fishing conflict while meeting 20% representation targets, locking in MPAs, and a boundary penalty of 0
-
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_30 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
@@ -141,10 +143,11 @@ prob_combined_30 <- problem(cost_combined, features = features_stack_4) %>%
 
 ## Solve problem
 sprob_combined_30 <- solve(prob_combined_30)
-## Plot the solution to see what it looks like
+
+## Plot the solution to preview
 plot(sprob_combined_30,  main = c("combined- 30% Targets"))
 
-#Save plot
+## Save plot
 writeRaster(sprob_combined_30, here("final_results", "scenario_4_combined", "sprob_combined_30_6hr_blm0.tif"), overwrite = TRUE)
 
 ```
@@ -152,7 +155,6 @@ writeRaster(sprob_combined_30, here("final_results", "scenario_4_combined", "spr
 
 #### RUN 4: combined - 50% target, Boundary Penalty = 0,  
 ```{r}
-
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_50 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
@@ -162,10 +164,11 @@ prob_combined_50 <- problem(cost_combined, features = features_stack_4) %>%
 
 ## Solve problem
 sprob_combined_50 <- solve(prob_combined_50)
-## Plot the solution to see what it looks like
+
+## Plot the solution to preview
 plot(sprob_combined_50,  main = c("combined- 50% Targets"))
 
-#Save plot
+## Save plot
 writeRaster(sprob_combined_50, here("final_results", "scenario_4_combined", "sprob_combined_50_6hr_blm0.tif"), overwrite = TRUE)
 
 ```
@@ -174,7 +177,7 @@ writeRaster(sprob_combined_50, here("final_results", "scenario_4_combined", "spr
 
 ***
 
-## **STEP 3: Run Some Industrial Fishing Scenarios with efficient boundary penalty (1x10^-6)**
+**Run some Industrial Fishing Scenarios with efficient boundary penalty (1x10^-6)**
 
 #### Run 5: Industrial - 10% target, Boundar Penaly = 0.000001
 ```{r}
@@ -232,7 +235,7 @@ prob_combined_30_blm <- problem(cost_combined, features = features_stack_4) %>%
 ## Solve problem
 sprob_combined_30_blm <- solve(prob_combined_30_blm)
 
-## Plot the solution to see what it looks like
+## Plot the solution to preview
 plot(sprob_combined_30_blm,  main = c("combined- 30% Targets"))
 
 #Save plot
@@ -254,25 +257,83 @@ prob_combined_50_blm <- problem(cost_combined, features = features_stack_4) %>%
 ## Solve problem
 sprob_combined_50_blm <- solve(prob_combined_50_blm)
 
-## Plot the solution to see what it looks like
+## Plot the solution to preview
 plot(sprob_combined_50_blm,  main = c("combined- 50% Targets"))
 
-#Save plot
+## Save plot
 writeRaster(sprob_combined_50_blm, here("final_results", "scenario_4_combined", "sprob_combined_50_6hr_blm0.000001.tif"), overwrite = TRUE)
 ```
 
 Other sensitivity analysis:
 
+#### Run 9: Combined - 20% target, boundary = 0 and no MPAs locked in
 ```{r}
-### OBJECTIVE: Minimize area while meeting 50% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+prob_combined_20_nompa <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600)
 
+## Solve problem
+sprob_combined_20_nompa <- solve(prob_combined_20_nompa)
+
+## Plot the solution to see what it looks like
+plot(sprob_combined_20_nompa,  main = c("combined- 20% Targets with no mpas"))
+
+## Save plot
+writeRaster(sprob_combined_20_nompa, here("final_results", "sensitivity", "mpas", "sprob_combined_20_6hr_blm0_nompa.tif"), overwrite = TRUE)
+```
+
+#### Run 10: Combined - 20% target, boundary = 0.000001 and no MPAs locked in
+```{r}
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+prob_combined_20_blm_nompa <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.000001)
+
+## Solve problem
+sprob_combined_20_blm_nompa <- solve(prob_combined_20_blm_nompa)
+
+## Plot the solution to see what it looks like
+plot(sprob_combined_20_blm_nompa,  main = c("combined- 20% Targets with boundary penalty and no mpas"))
+
+## Save plot
+writeRaster(sprob_combined_20_blm_nompa, here("final_results", "sensitivity", "mpas", "sprob_combined_20_6hr_blm0.000001_nompa.tif"), overwrite = TRUE)
+```
+
+
+#### Run 10: Combined - 20% target, boundary = 0 and KBAs & MPAs locked in
+```{r}
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas_4) %>% 
+  add_locked_in_constraints(exist_kbas) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0)
+
+## Solve problem
+sprob_combined_20 <- solve(prob_combined_20)
+## Plot the solution to see what it looks like
+plot(sprob_combined_20,  main = c("combined- 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20, here("final_results", "sensitivity", "key_biodiversity_areas", "sprob_combined_20_6hr_blm0_mpas_kbas.tif"), overwrite = TRUE)
+```
+
+
+#### Run 11: Combined - 20% target, boundary = 0 and KBAs & MPAs locked in
+```{r}
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
 prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   #add_locked_in_constraints(exist_mpas_4) %>% 
   #add_locked_in_constraints(exist_kbas) %>%
-  add_locked_in_constraints(exist_aggs) %>% 
+  #add_locked_in_constraints(exist_aggs) %>% 
   add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
   add_boundary_penalties(0)
 
@@ -283,6 +344,4 @@ plot(sprob_combined_20,  main = c("combined- 20% Targets"))
 
 #Save plot
 writeRaster(sprob_combined_20, here("final_results", "sensitivity", "sprob_combined_20_6hr_blm0_aggsites.tif"), overwrite = TRUE)
-```
-
 

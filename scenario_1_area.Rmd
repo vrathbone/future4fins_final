@@ -64,7 +64,7 @@ plot(exist_mpas)
 ```
 ### **STEP 2: Run Models and Sensitivity Analysis**
 
-#### SCENARIO 1: Baseline - 20% target, Boundary Penalty = 0,  
+#### RUN 1: Baseline - 20% target, Boundary Penalty = 0,  
 ```{r}
 ### OBJECTIVE: Minimize area while meeting 20% representation targets, locking in MPAs, locking out oil rigs, and a boundary penalty of 0
 
@@ -98,7 +98,7 @@ ggplot()+
 
 
 
-#### SCENARIO 2: Baseline - 10% target, Boundary Penalty = 0 
+#### RUN 2: Baseline - 10% target, Boundary Penalty = 0 
 ```{r}
 ### OBJECTIVE: Minimize area while meeting 10% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
 
@@ -119,7 +119,7 @@ writeRaster(sprob_area_10, here("final_results", "scenario_1_area",  "sprob_area
 ```
 
 
-#### SCENARIO 3: Baseline - 50% target, Boundary Penalty = 0 
+#### RUN 3: Baseline - 50% target, Boundary Penalty = 0 
 ```{r}
 ### OBJECTIVE: Minimize area while meeting 50% representation targets, locking in MPAs, locking out oil rigs, and a boundary penatly of 0
 
@@ -185,6 +185,21 @@ writeRaster(sprob_area_30, here("final_results", "scenario_1_area",  "sprob_area
 
 
 
+```{r}
+# Sensitivity analysis with MPA's not locked in
+prob_area_20_nompa <- problem(cost_area, features = features_stack) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+
+## Solve problem
+sprob_area_20_nompa <- solve(prob_area_20_nompa)
+## Plot the solution to see what it looks like
+plot(sprob_area_20_nompa,  main = c("Area- 20% Targets without MPA's locked in"))
+
+#Write Raster
+writeRaster(sprob_area_20_nompa, here("final_results", "scenario_1_area",  "sprob_area_20_6hr_blm0_nompa.tif"), overwrite = TRUE)
+```
 
 
 
