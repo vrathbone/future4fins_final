@@ -147,7 +147,6 @@ plot(sprob_area_50,  main = c("Area- 50% Targets"))
 
 ## Save as tif
 writeRaster(sprob_area_50, here("final_results", "scenario_1_area",  "sprob_area_50_6hr_blm0.tif"), overwrite = TRUE)
-
 ```
 
 
@@ -251,7 +250,7 @@ sprob_area_20_nompa <- solve(prob_area_20_nompa)
 plot(sprob_area_20_nompa,  main = c("Area- 20% Targets without MPA's locked in"))
 
 ## Save as tiff
-writeRaster(sprob_area_20_nompa, here("final_results", "scenario_1_area",  "sprob_area_20_6hr_blm0_nompa.tif"), overwrite = TRUE)
+writeRaster(sprob_area_20_nompa, here("final_results", "sensitivity", "mpas", "sprob_area_20_6hr_blm0_nompa.tif"), overwrite = TRUE)
 ```
 
 #### RUN 10: Baseline - 20% targets, boundary penalty = 0.000001, and no MPAs locked in
@@ -261,13 +260,13 @@ prob_area_20_nompa <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalty(0.000001)
+  add_boundary_penalties(0.000001)
 
 ## Solve problem
 sprob_area_20_nompa <- solve(prob_area_20_nompa)
 
 ## Plot the solution to see what it looks like
-plot(sprob_area_20_nompa,  main = c("Area- 20% Targets without MPA's locked in"))
+plot(sprob_area_20_nompa,  main = c("Area- 20% Targets without MPA's locked in (with boundary)"))
 
 ## Save as tiff
 writeRaster(sprob_area_20_nompa, here("final_results", "sensitivity", "mpas",  "sprob_area_20_6hr_blm0.000001_nompa.tif"), overwrite = TRUE)

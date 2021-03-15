@@ -16,7 +16,6 @@ library(janitor)
 library(prioritizr)
 library(rgdal)
 library(gurobi)
-
 ```
 
 ## Scenario 2 - Artisanal Fishing Pressure 
@@ -89,7 +88,6 @@ plot(sprob_artisanal_10,  main = c("Artisanal- 10% Targets"))
 
 ## Save as tif
 writeRaster(sprob_artisanal_10, here("final_results", "scenario_2_artisanal", "sprob_artisanal_10_6hr_blm0.tif"), overwrite = TRUE)
-
 ```
 
 
@@ -123,7 +121,7 @@ prob_artisanal_30 <- problem(cost_artisanal, features = features_stack) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 21600)
 
 ## Solve problem
-sprob_artisanal_30 <- solve(prob_artisanal_20)
+sprob_artisanal_30 <- solve(prob_artisanal_30)
 
 ## Plot the solution to see what it looks like
 plot(sprob_artisanal_30,  main = c("Artisanal- 30% Targets"))
@@ -151,6 +149,7 @@ plot(sprob_artisanal_50,  main = c("Artisanal- 50% Targets"))
 #Save plot
 writeRaster(sprob_artisanal_50, here("final_results", "scenario_2_artisanal", "sprob_artisanal_50_6hr_blm0.tif"), overwrite = TRUE)
 ```
+
 
 ### **STEP 3: Run Models with efficient boundary penalty (0.000001)**
 
@@ -199,12 +198,13 @@ writeRaster(sprob_artisanal_20_blm, here("final_results", "scenario_2_artisanal"
 #### RUN 7: Artisanal - 30% target, Boundary Penalty = 0.000001
 ```{r}
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+
 prob_artisanal_30_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
   add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(penalty=0.000001) %>%
+  add_boundary_penalties(penalty=0.000001)
 
 ## Solve problem
 sprob_artisanal_30_blm  <- solve(prob_artisanal_30_blm )
@@ -213,7 +213,7 @@ sprob_artisanal_30_blm  <- solve(prob_artisanal_30_blm )
 plot(sprob_artisanal_30_blm ,  main = c("Artisanal- 30% Targets (with boundary penalty)"))
 
 ## Save as tif
-writeRaster(sprob_artisanal_20_blm, here("final_results", "scenario_2_artisanal", "sprob_artisanal_30_6hr_blm0.000001.tif"), overwrite = TRUE)
+writeRaster(sprob_artisanal_30_blm, here("final_results", "scenario_2_artisanal", "sprob_artisanal_30_6hr_blm0.000001.tif"), overwrite = TRUE)
 ```
 
 
@@ -256,7 +256,7 @@ sprob_artisanal_20_nompa  <- solve(prob_artisanal_20_nompa )
 plot(sprob_artisanal_20_nompa ,  main = c("Artisanal - 20% Targets without MPA's locked in"))
 
 ## Save as tiff
-writeRaster(sprob_area_20_nompa, here("final_results", "scenario_1_area",  "sprob_artisanal_20_6hr_blm0_nompa.tif"), overwrite = TRUE)
+writeRaster(sprob_artisanal_20_nompa, here("final_results", "scenario_2_artisanal",  "sprob_artisanal_20_6hr_blm0_nompa.tif"), overwrite = TRUE)
 ```
 
 
@@ -267,7 +267,7 @@ prob_artisanal_20_blm_nompa <- problem(cost_artisanal, features = features_stack
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalty(0.000001)
+  add_boundary_penalties(0.000001)
 
 ## Solve problem
 sprob_artisanal_20_blm_nompa  <- solve(prob_artisanal_20_blm_nompa )
@@ -276,7 +276,7 @@ sprob_artisanal_20_blm_nompa  <- solve(prob_artisanal_20_blm_nompa )
 plot(sprob_artisanal_20_blm_nompa ,  main = c("Artisanal - 20% Targets without MPA's locked in"))
 
 ## Save as tiff
-writeRaster(sprob_artisanal_20_blm_nompa, here("final_results", "scenario_1_area",  "sprob_artisanal_20_6hr_blm0.000001_nompa.tif"), overwrite = TRUE)
+writeRaster(sprob_artisanal_20_blm_nompa, here("final_results", "scenario_2_artisanal",  "sprob_artisanal_20_6hr_blm0.000001_nompa.tif"), overwrite = TRUE)
 ```
 
 
