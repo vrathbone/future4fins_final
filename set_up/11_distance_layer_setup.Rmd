@@ -40,7 +40,7 @@ mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 #### **STEP 2: Read in Bathymetry Data (rachel edited?)**
 ```{r}
 ## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
-bathy_path <- 'G:/group_project/data/habitats/bathy_classes/rachel_edited'
+bathy_path <- 'G:/group_project/data/habitats/bathy_classes/raw_data'
 bathy_shape <- list.files(bathy_path, full.names = TRUE) 
 
 bathy_sf <- sf::read_sf(bathy_shape[8])
@@ -112,13 +112,30 @@ dist_rast <- raster::distance(bathy_reclass) %>%
 ## plot it!
 plot(dist_rast)
 
+## change 0 values to 0.00001 since prioritzr 
+dist_rast[dist_rast == 0] <-0.00001
+
+## plot again 
+plot(dist_rast)
+
+dist_rescaled <- dist_rast/maxValue(dist_rast)
+
+dist_rescaled[dist_rescaled <= 2.789642e-10] <- 2.789642e-02
+
+plot(dist_rescaled)
+
 ## created a dataframe to check it out
 dist_df <- dist_rast %>%
-  rasterToPoints() %>%
+  rasterToPoints() %>% 
   as.data.frame()
 
+dist_rescaled_df <- dist_rescaled %>% 
+  rasterToPoints() %>% 
+  as.data.frame()
+
+
 ### save it
-writeRaster(dist_rast, here('set_up/final_rasters/costs/dist_rast.tif'), overwrite = TRUE)
+writeRaster(dist_rescaled, here('set_up/final_rasters/costs/dist_rast.tif'), overwrite = TRUE)
 
 ```
 
