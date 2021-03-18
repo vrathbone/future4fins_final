@@ -136,7 +136,7 @@ sprob_combined_inverse_30 <- solve(prob_combined_inverse_30)
 plot(sprob_combined_inverse_30,  main = c("inverse- 30% Targets"))
 
 ## Save as tif
-writeRaster(sprob_combined_inverse_30, here("final_results", "scenario_5_inverse",  "sprob_combined_inverse_30_6hr_blm0.tif"), overwrite = TRUE)v
+writeRaster(sprob_combined_inverse_30, here("final_results", "scenario_5_inverse",  "sprob_combined_inverse_30_6hr_blm0.tif"), overwrite = TRUE)
 ```
 
 
@@ -272,7 +272,7 @@ prob_inverse_20_blm_nompa <- problem(cost_combined_inverse, features = features_
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
-  add_boundary_penalty(bp)
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_inverse_20_blm_nompa <- solve(prob_inverse_20_blm_nompa)
