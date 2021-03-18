@@ -88,7 +88,7 @@ prob_artisanal_10 <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_artisanal_10 <- solve(prob_artisanal_10)
@@ -108,7 +108,7 @@ prob_artisanal_20 <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_artisanal_20 <- solve(prob_artisanal_20)
@@ -128,7 +128,7 @@ prob_artisanal_30 <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_artisanal_30 <- solve(prob_artisanal_30)
@@ -148,7 +148,7 @@ prob_artisanal_50 <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_artisanal_50 <- solve(prob_artisanal_50)
@@ -170,8 +170,8 @@ prob_artisanal_10_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(penalty = 0.000001) %>%
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(penalty = bp) %>%
 
 ## Solve problem
 sprob_artisanal_10_blm <- solve(prob_artisanal_10_blm)
@@ -191,8 +191,8 @@ prob_artisanal_20_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(penalty=0.000001) %>%
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(penalty=bp) %>%
 
 ## Solve problem
 sprob_artisanal_20_blm  <- solve(prob_artisanal_20_blm)
@@ -213,8 +213,8 @@ prob_artisanal_30_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(penalty=0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(penalty=bp)
 
 ## Solve problem
 sprob_artisanal_30_blm  <- solve(prob_artisanal_30_blm )
@@ -234,8 +234,8 @@ prob_artisanal_50_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(penalty=0.000001) %>%
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(penalty=bp) %>%
 
 ## Solve problem
 sprob_artisanal_50_blm  <- solve(prob_artisanal_50_blm )
@@ -257,7 +257,7 @@ writeRaster(sprob_artisanal_50_blm, here("final_results", "scenario_2_artisanal"
 prob_artisanal_20_nompa <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_artisanal_20_nompa  <- solve(prob_artisanal_20_nompa )
@@ -276,8 +276,8 @@ writeRaster(sprob_artisanal_20_nompa, here("final_results", "scenario_2_artisana
 prob_artisanal_20_blm_nompa <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_artisanal_20_blm_nompa  <- solve(prob_artisanal_20_blm_nompa )
