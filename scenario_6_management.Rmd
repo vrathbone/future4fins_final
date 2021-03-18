@@ -56,6 +56,16 @@ exist_mpas_6 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_m
 plot(exist_mpas_6)
 ```
 
+
+### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
+```{r}
+# if you decide to change the gap, time-limit or boundary penalty value, change it here and rerun the subsequent model runs
+
+gap <- 0.01
+time_limit <- 21600
+bp <- 0.000001
+```
+
 #### RUN 1: Baseline - 10% target, Boundary Penalty = 0 
 ```{r}
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
@@ -63,7 +73,7 @@ prob_management_10 <- problem(cost_distance, features = features_stack_6) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas_6) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_management_10 <- solve(prob_management_10)
@@ -82,8 +92,8 @@ prob_management_10_blm <- problem(cost_distance, features = features_stack_6) %>
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas_6) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_management_10_blm <- solve(prob_management_10_blm)
