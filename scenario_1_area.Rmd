@@ -64,10 +64,14 @@ exist_mpas <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa
 plot(exist_mpas)
 ```
 
-### Set the efficient boundary penalty to use in soem runs:
+### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
 ```{r}
-# if you decide to change the boundary penalty value, change it here and rerun 
+# if you decide to change the gap, time-limite or boundary penalty value, change it here and rerun the subsequent model runs
+
+gap <- 0.01
+time_limit <- 21600
 bp <- 0.000001
+
 ```
 
 ### **STEP 2: Run Models with varying targets**
@@ -79,7 +83,7 @@ prob_area_10 <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_area_10 <- solve(prob_area_10)
@@ -98,7 +102,7 @@ prob_area_20 <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_area_20 <- solve(prob_area_20)
@@ -117,7 +121,7 @@ prob_area_30 <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_area_30 <- solve(prob_area_30)
@@ -137,7 +141,7 @@ prob_area_50 <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_area_50 <- solve(prob_area_50)
@@ -159,8 +163,8 @@ prob_area_10 <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_area_10 <- solve(prob_area_10)
@@ -180,8 +184,8 @@ prob_area_20 <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_area_20 <- solve(prob_area_20)
@@ -200,8 +204,8 @@ prob_area_30 <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_area_30 <- solve(prob_area_30)
@@ -220,7 +224,7 @@ prob_area_20 <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(0.000001)
 
 ## Solve problem
@@ -241,7 +245,7 @@ writeRaster(sprob_area_50, here("final_results", "scenario_1_area",  "sprob_area
 prob_area_20_nompa <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_area_20_nompa <- solve(prob_area_20_nompa)
@@ -259,8 +263,8 @@ writeRaster(sprob_area_20_nompa, here("final_results", "sensitivity", "mpas", "s
 prob_area_20_nompa <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_area_20_nompa <- solve(prob_area_20_nompa)

@@ -69,6 +69,16 @@ exist_mpas <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa
 plot(exist_mpas)
 ```
 
+### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
+```{r}
+# if you decide to change the gap, time-limit or boundary penalty value, change it here and rerun the subsequent model runs
+
+gap <- 0.01
+time_limit <- 21600
+bp <- 0.000001
+```
+
+
 ### **STEP 2: Run Models with varying targets**
 
 #### RUN 1: Artisanal - 10% target, Boundary Penalty = 0 
