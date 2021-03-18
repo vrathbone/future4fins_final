@@ -70,6 +70,16 @@ exist_mpas_3 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_m
 plot(exist_mpas_3)
 ```
 
+### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
+```{r}
+# if you decide to change the gap, time-limit or boundary penalty value, change it here and rerun the subsequent model runs
+
+gap <- 0.01
+time_limit <- 21600
+bp <- 0.000001
+```
+
+
 ### **STEP 2: Run Models with varying targets**
 
 #### RUN 1: Industrial - 10% target, Boundary Penalty = 0 
@@ -79,7 +89,7 @@ prob_industrial_10 <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas_3) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_industrial_10 <- solve(prob_industrial_10)
@@ -99,7 +109,7 @@ prob_industrial_20 <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_3) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120) 
+  add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
 sprob_industrial_20 <- solve(prob_industrial_20)
@@ -120,7 +130,7 @@ prob_industrial_30 <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
   add_locked_in_constraints(exist_mpas_3) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_industrial_30 <- solve(prob_industrial_30)
@@ -140,7 +150,7 @@ prob_industrial_50 <- problem(cost_industrial, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_industrial_50 <- solve(prob_industrial_50)
@@ -149,7 +159,7 @@ sprob_industrial_50 <- solve(prob_industrial_50)
 plot(sprob_industrial_50,  main = c("Industrial- 50% Targets"))
 
 ## Save as tif
-writeRaster(sprob_industrial_30, here("final_results", "scenario_3_industrial", "sprob_industrial_50_6hr_blm0.tif"), overwrite = TRUE)
+writeRaster(sprob_industrial_50, here("final_results", "scenario_3_industrial", "sprob_industrial_50_6hr_blm0.tif"), overwrite = TRUE)
 ```
 
 
@@ -162,8 +172,8 @@ prob_industrial_10_blm <- problem(cost_industrial, features = features_stack_3) 
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas_3) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_industrial_10_blm <- solve(prob_industrial_10_blm)
@@ -183,8 +193,8 @@ prob_industrial_20_blm <- problem(cost_industrial, features = features_stack_3) 
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_3) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_industrial_20_blm <- solve(prob_industrial_20_blm)
@@ -204,8 +214,8 @@ prob_industrial_30_blm <- problem(cost_industrial, features = features_stack_3) 
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
   add_locked_in_constraints(exist_mpas_3) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_industrial_30_blm <- solve(prob_industrial_30_blm)
@@ -224,8 +234,8 @@ prob_industrial_50_blm <- problem(cost_industrial, features = features_stack_3) 
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas_3) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_industrial_50_blm <- solve(prob_industrial_50_blm)
@@ -246,7 +256,7 @@ prob_industrial_20_nompa <- problem(cost_industrial, features = features_stack_3
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_3) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120) 
+  add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
 sprob_industrial_20_nompa <- solve(prob_industrial_20_nompa)
@@ -268,8 +278,8 @@ prob_industrial_20_blm_nompa <- problem(cost_industrial, features = features_sta
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_3) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 120) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_industrial_20_blm_nompa <- solve(prob_industrial_20_blm_nompa)
