@@ -56,6 +56,16 @@ exist_mpas_6 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_m
 plot(exist_mpas_6)
 ```
 
+
+### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
+```{r}
+# if you decide to change the gap, time-limit or boundary penalty value, change it here and rerun the subsequent model runs
+
+gap <- 0.01
+time_limit <- 21600
+bp <- 0.000001
+```
+
 #### RUN 1: Baseline - 10% target, Boundary Penalty = 0 
 ```{r}
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
@@ -63,7 +73,7 @@ prob_management_10 <- problem(cost_distance, features = features_stack_6) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas_6) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_management_10 <- solve(prob_management_10)
@@ -82,8 +92,8 @@ prob_management_10_blm <- problem(cost_distance, features = features_stack_6) %>
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas_6) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_management_10_blm <- solve(prob_management_10_blm)
@@ -94,3 +104,44 @@ plot(sprob_management_10_blm,  main = c("Area- 10% Targets"))
 ## Save as tif
 writeRaster(sprob_management_10_blm, here("final_results", "scenario_6_management",  "sprob_management_10_6hr_blm0.000001.tif"), overwrite = TRUE)
 ```
+
+
+#### RUN 3: Baseline - 5% target, Boundary Penalty = 0 
+```{r}
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_management_.05 <- problem(cost_distance, features = features_stack_6) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.05) %>%
+  add_locked_in_constraints(exist_mpas_6) %>%
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
+
+## Solve problem
+sprob_management_.05 <- solve(prob_management_.05)
+
+## Plot the solution to see what it looks like
+plot(sprob_management_.05,  main = c("Area- 5% Targets"))
+
+## Save as tif
+writeRaster(sprob_management_.05, here("final_results", "scenario_6_management",  "sprob_management_5_6hr_blm0.tif"), overwrite = TRUE)
+```
+
+#### RUN 4: Baseline - 5% target, Boundary Penalty = 0.00001 
+```{r}
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_management_.05_blm <- problem(cost_distance, features = features_stack_6) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.05) %>%
+  add_locked_in_constraints(exist_mpas_6) %>%
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
+
+## Solve problem
+sprob_management_.05_blm <- solve(prob_management_.05_blm)
+
+## Plot the solution to see what it looks like
+plot(sprob_management_.05_blm,  main = c("Area- 5% Targets"))
+
+## Save as tif
+writeRaster(sprob_management_10_blm, here("final_results", "scenario_6_management",  "sprob_management_5_6hr_blm0.000001.tif"), overwrite = TRUE)
+```
+

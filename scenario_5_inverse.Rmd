@@ -68,6 +68,15 @@ exist_mpas_5 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_m
 plot(exist_mpas_5)
 ```
 
+### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
+```{r}
+# if you decide to change the gap, time-limit or boundary penalty value, change it here and rerun the subsequent model runs
+
+gap <- 0.01
+time_limit <- 21600
+bp <- 0.000001
+```
+
 ### **STEP 2: Run Models with varying targets**
 
 #### RUN 1: combined - 10% target, Boundary Penalty = 0,  
@@ -77,7 +86,7 @@ prob_combined_inverse_10 <- problem(cost_combined_inverse, features = features_s
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas_5) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600)
+  add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
 sprob_combined_inverse_10 <- solve(prob_combined_inverse_10)
@@ -98,7 +107,7 @@ prob_combined_inverse_10 <- problem(cost_combined_inverse, features = features_s
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_5) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) 
+  add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
 sprob_combined_inverse_20 <- solve(prob_combined_inverse_20)
@@ -118,7 +127,7 @@ prob_combined_inverse_30 <- problem(cost_combined_inverse, features = features_s
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
   add_locked_in_constraints(exist_mpas_5) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) 
+  add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
 sprob_combined_inverse_30 <- solve(prob_combined_inverse_30)
@@ -127,7 +136,7 @@ sprob_combined_inverse_30 <- solve(prob_combined_inverse_30)
 plot(sprob_combined_inverse_30,  main = c("inverse- 30% Targets"))
 
 ## Save as tif
-writeRaster(sprob_combined_inverse_30, here("final_results", "scenario_5_inverse",  "sprob_combined_inverse_30_6hr_blm0.tif"), overwrite = TRUE)v
+writeRaster(sprob_combined_inverse_30, here("final_results", "scenario_5_inverse",  "sprob_combined_inverse_30_6hr_blm0.tif"), overwrite = TRUE)
 ```
 
 
@@ -138,7 +147,7 @@ prob_combined_inverse_50 <- problem(cost_combined_inverse, features = features_s
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas_5) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) 
+  add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
 sprob_combined_inverse_50 <- solve(prob_combined_inverse_50)
@@ -160,8 +169,8 @@ prob_combined_inverse_10_blm <- problem(cost_combined_inverse, features = featur
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas_5) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_combined_inverse_10_blm <- solve(prob_combined_inverse_10_blm)
@@ -181,8 +190,8 @@ prob_combined_inverse_20__blm <- problem(cost_combined_inverse, features = featu
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas_5) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_combined_inverse_20__blm <- solve(prob_combined_inverse_20__blm)
@@ -202,8 +211,8 @@ prob_combined_inverse_30_blm <- problem(cost_combined_inverse, features = featur
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
   add_locked_in_constraints(exist_mpas_5) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_combined_inverse_30_blm <- solve(prob_combined_inverse_30_blm)
@@ -223,8 +232,8 @@ prob_combined_inverse_50_blm <- problem(cost_combined_inverse, features = featur
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas_5) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalties(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_combined_inverse_50_blm <- solve(prob_combined_inverse_50_blm)
@@ -244,7 +253,7 @@ writeRaster(sprob_combined_inverse_50_blm, here("final_results", "scenario_5_inv
 prob_combined_inverse_20_nompa <- problem(cost_combined_inverse, features = features_stack_5) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) 
+  add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
 sprob_combined_inverse_20_nompa <- solve(prob_combined_inverse_20_nompa)
@@ -262,8 +271,8 @@ writeRaster(sprob_combined_inverse_20_nompa, here("final_results", "sensitivity"
 prob_inverse_20_blm_nompa <- problem(cost_combined_inverse, features = features_stack_5) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
-  add_boundary_penalty(0.000001)
+  add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_inverse_20_blm_nompa <- solve(prob_inverse_20_blm_nompa)
