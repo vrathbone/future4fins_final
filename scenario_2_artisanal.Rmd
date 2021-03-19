@@ -171,16 +171,16 @@ prob_artisanal_10_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_relative_targets(0.1) %>%
   add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
-  add_boundary_penalties(penalty = bp) %>%
+  add_boundary_penalties(penalty = bp)
 
 ## Solve problem
 sprob_artisanal_10_blm <- solve(prob_artisanal_10_blm)
 
 ## Plot the solution to see what it looks like
-plot(sprob_artisanal_10_blm,  main = c("Artisanal- 10% Targets (with boundary penalty"))
+plot(sprob_artisanal_10_blm,  main = c("Artisanal- 10% Targets (with boundary penalty)"))
 
 ## Save as tif
-writeRaster(sprob_artisanal_20_blm, here("final_results", "scenario_2_artisanal", "sprob_artisanal_10_6hr_blm0.000001.tif"), overwrite = TRUE)
+writeRaster(sprob_artisanal_10_blm, here("final_results", "scenario_2_artisanal", "sprob_artisanal_10_6hr_blm0.000001.tif"), overwrite = TRUE)
 ```
 
 
@@ -192,7 +192,7 @@ prob_artisanal_20_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
-  add_boundary_penalties(penalty=bp) %>%
+  add_boundary_penalties(penalty=bp)
 
 ## Solve problem
 sprob_artisanal_20_blm  <- solve(prob_artisanal_20_blm)
@@ -235,7 +235,7 @@ prob_artisanal_50_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
-  add_boundary_penalties(penalty=bp) %>%
+  add_boundary_penalties(penalty=bp)
 
 ## Solve problem
 sprob_artisanal_50_blm  <- solve(prob_artisanal_50_blm )
