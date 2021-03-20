@@ -50,10 +50,10 @@ This includes all species distributions and habitat rasters
 ```{r}
 # List of conservation features that will have been loaded into the global environment in other
 ### pull in species stack that we created in set-up step 3
-features_stack_) <- brick(here("set_up", "final_rasters", "conservation_features", "all_features_stack.tif"))
+features_stack <- brick(here("set_up", "final_rasters", "conservation_features", "all_features_stack.tif"))
 
 ### plot to make sure it looks okay
-plot(features_stack_)
+plot(features_stack)
 ```
 
 ### Additional Files (Locked-in & Locked-out)
@@ -94,10 +94,10 @@ writeRaster(sprob_combined_20_0, here("final_results", "boundary_penalty", "spro
 ```{r}
 
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
-prob_combined_20_000003 <- problem(cost_combined_0, features = features_stack_0) %>%
+prob_combined_20_000003 <- problem(cost_combined_0, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_4) %>%
+  add_locked_in_constraints(exist_mpas_0) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
   add_boundary_penalties(0.000003)
 
@@ -107,7 +107,7 @@ sprob_combined_20_000003 <- solve(prob_combined_20_000003)
 plot(sprob_combined_20_000003,  main = c("combined - 0.000003 boundary"))
 
 #Save plot
-writeRaster(sprob_combined_20_01, here("final_results", "boundary_penalty", "sprob_combined_20_6hr_blm0.000003.tif"), overwrite = TRUE)
+writeRaster(sprob_combined_20_000003, here("final_results", "boundary_penalty", "sprob_combined_20_6hr_blm0.000003.tif"), overwrite = TRUE)
 
 ```
 
@@ -171,6 +171,68 @@ plot(sprob_combined_20,  main = c("combined- 20% Targets"))
 
 #Save plot
 writeRaster(sprob_combined_20_0001, (here("final_results", "boundary_penalty", "sprob_combined_20_6hr_blm0.0001tif")), overwrite = TRUE)
+
+```
+
+
+#### Boundary Penalty: 1
+```{r}
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_20_1 <- problem(cost_combined_0, features = features_stack) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas_0) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(1)
+
+## Solve problem
+sprob_combined_20_1 <- solve(prob_combined_20_1)
+## Plot the solution to see what it looks like
+plot(sprob_combined_20_1,  main = c("combined- 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20_1, (here("blm_sensitivity", "sprob_combined_20_6hr_blm1.tif")), overwrite = TRUE)
+
+```
+
+
+#### Boundary Penalty: 0.000000001
+```{r}
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_20_000000001 <- problem(cost_combined_0, features = features_stack) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas_0) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.000000001)
+
+## Solve problem
+sprob_combined_20_000000001 <- solve(prob_combined_20_000000001)
+## Plot the solution to see what it looks like
+plot(sprob_combined_20_000000001,  main = c("combined- 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20_000000001, (here("blm_sensitivity", "sprob_combined_20_6hr_blm000000001.tif")), overwrite = TRUE)
+
+```
+
+#### Boundary Penalty: 0.001
+```{r}
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
+prob_combined_20_001 <- problem(cost_combined_0, features = features_stack) %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.2) %>%
+  add_locked_in_constraints(exist_mpas_0) %>%
+  add_gurobi_solver(gap = 0.01, time_limit = 21600) %>% 
+  add_boundary_penalties(0.001)
+
+## Solve problem
+sprob_combined_20_001 <- solve(prob_combined_20_001)
+## Plot the solution to see what it looks like
+plot(sprob_combined_20_001,  main = c("combined- 20% Targets"))
+
+#Save plot
+writeRaster(sprob_combined_20_001, (here("blm_sensitivity", "sprob_combined_20_6hr_blm001.tif")), overwrite = TRUE)
 
 ```
 
