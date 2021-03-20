@@ -32,34 +32,143 @@ calc_percent_protected <- function(final_raster, x){
 }
 ```
 
-#### Looking at 10% Conservation Target
+
+
 ```{r}
-area_10_6hr_blm0.000001 <- raster(here("final_results/scenario_1_area/sprob_area_10_6hr_blm0.000001.tif"))
-area_10_6hr_blm0 <- raster(here("final_results/scenario_1_area/sprob_area_10_6hr_blm0.tif"))
+area_path <- here("final_results", "scenario_1_area")
+area_files <- list.files(area_path, full.names = TRUE)
 
-percent_area_10_6hr_blm0.000001 <- calc_percent_protected(area_10_6hr_blm0.000001,sprob_area_10_6hr_blm0.000001)
-percent_area_10_6hr_blm0 <- calc_percent_protected(area_10_6hr_blm0,sprob_area_10_6hr_blm0)
+area_10_blm0.000001 <- raster(area_files[1])
+percent_area_10_blm0.000001 <- calc_percent_protected(area_10_blm0.000001,sprob_area_10_6hr_blm0.000001 )
+area_10_blm0 <- raster(area_files[2])
+percent_area_10_blm0 <- calc_percent_protected(area_10_blm0,sprob_area_10_6hr_blm0)
 
-combined_10_6hr_blm0.000001 <- raster(here("final_results/scenario_4_combined/sprob_combined_10_6hr_blm0.000001.tif"))
-combined_10_6hr_blm0 <- raster(here("final_results/scenario_4_combined/sprob_combined_10_6hr_blm0.tif"))
+area_20_blm0.000001 <- raster(area_files[3])
+percent_area_20_blm0.000001 <- calc_percent_protected(area_20_blm0.000001,sprob_area_20_6hr_blm0.000001)
+area_20_blm0 <- raster(area_files[4])
+percent_area_20_blm0 <- calc_percent_protected(area_20_blm0,sprob_area_20_6hr_blm0)
 
-percent_combined_10_6hr_blm0.000001 <- calc_percent_protected(combined_10_6hr_blm0.000001,sprob_combined_10_6hr_blm0.000001)
-percent_combined_10_6hr_blm0 <- calc_percent_protected(combined_10_6hr_blm0,sprob_combined_10_6hr_blm0)
+area_30_blm0.000001 <- raster(area_files[6])
+percent_area_30_blm0.000001 <- calc_percent_protected(area_30_blm0.000001,sprob_area_30_6hr_blm0.000001)
+area_30_blm0 <- raster(area_files[7])
+percent_area_30_blm0 <- calc_percent_protected(area_30_blm0,sprob_area_30_6hr_blm0)
 
+area_50_blm0.000001 <- raster(area_files[8])
+percent_area_50_blm0.000001 <- calc_percent_protected(area_50_blm0.000001,sprob_area_50_6hr_blm0.000001)
+area_50_blm0 <- raster(area_files[9])
+percent_area_50_blm0 <- calc_percent_protected(area_50_blm0,sprob_area_50_6hr_blm0)
+```
+
+
+
+```{r}
+artisanal_path <- here("final_results", "scenario_2_artisanal")
+artisanal_files <- list.files(artisanal_path, full.names = TRUE)
+
+artisanal_10_blm0.000001 <- raster(artisanal_files[1])
+percent_artisanal_10_blm0.000001 <- calc_percent_protected(artisanal_10_blm0.000001,sprob_artisanal_10_6hr_blm0.000001 )
+artisanal_10_blm0 <- raster(artisanal_files[2])
+percent_artisanal_10_blm0 <- calc_percent_protected(artisanal_10_blm0,sprob_artisanal_10_6hr_blm0)
+
+artisanal_20_blm0.000001 <- raster(artisanal_files[3])
+percent_artisanal_20_blm0.000001 <- calc_percent_protected(artisanal_20_blm0.000001,sprob_artisanal_20_6hr_blm0.000001)
+artisanal_20_blm0 <- raster(artisanal_files[4])
+percent_artisanal_20_blm0 <- calc_percent_protected(artisanal_20_blm0,sprob_artisanal_20_6hr_blm0)
+
+artisanal_30_blm0.000001 <- raster(artisanal_files[12])
+percent_artisanal_30_blm0.000001 <- calc_percent_protected(artisanal_30_blm0.000001,sprob_artisanal_30_6hr_blm0.000001)
+artisanal_30_blm0 <- raster(artisanal_files[13])
+percent_artisanal_30_blm0 <- calc_percent_protected(artisanal_30_blm0,sprob_artisanal_30_6hr_blm0)
+
+artisanal_50_blm0.000001 <- raster(artisanal_files[14])
+percent_artisanal_50_blm0.000001 <- calc_percent_protected(artisanal_50_blm0.000001,sprob_artisanal_50_6hr_blm0.000001)
+artisanal_50_blm0 <- raster(artisanal_files[15])
+percent_artisanal_50_blm0 <- calc_percent_protected(artisanal_50_blm0,sprob_artisanal_50_6hr_blm0)
 
 ```
 
 ```{r}
-area_50_6hr_blm0.000001 <- raster(here("final_results/scenario_1_area/sprob_area_50_6hr_blm0.000001.tif"))
-area_50_6hr_blm0 <- raster(here("final_results/scenario_1_area/sprob_area_50_6hr_blm0.tif"))
+industrial_path <- here("final_results", "scenario_3_industrial")
+industrial_files <- list.files(industrial_path, full.names = TRUE)
 
-percent_area_50_6hr_blm0.000001 <- calc_percent_protected(area_50_6hr_blm0.000001,sprob_area_50_6hr_blm0.000001)
-percent_area_50_6hr_blm0 <- calc_percent_protected(area_50_6hr_blm0,sprob_area_50_6hr_blm0)
+industrial_10_blm0.000001 <- raster(industrial_files[1])
+percent_industrial_10_blm0.000001 <- calc_percent_protected(industrial_10_blm0.000001,sprob_industrial_10_6hr_blm0.000001 )
+industrial_10_blm0 <- raster(industrial_files[2])
+percent_industrial_10_blm0 <- calc_percent_protected(industrial_10_blm0,sprob_industrial_10_6hr_blm0)
 
-combined_50_6hr_blm0.000001 <- raster(here("final_results/scenario_4_combined/sprob_combined_50_6hr_blm0.000001.tif"))
-combined_50_6hr_blm0 <- raster(here("final_results/scenario_4_combined/sprob_combined_50_6hr_blm0.tif"))
+industrial_20_blm0.000001 <- raster(industrial_files[3])
+percent_industrial_20_blm0.000001 <- calc_percent_protected(industrial_20_blm0.000001,sprob_industrial_20_6hr_blm0.000001)
+industrial_20_blm0 <- raster(industrial_files[4])
+percent_industrial_20_blm0 <- calc_percent_protected(industrial_20_blm0,sprob_industrial_20_6hr_blm0)
 
-percent_combined_50_6hr_blm0.000001 <- calc_percent_protected(combined_50_6hr_blm0.000001 ,sprob_combined_50_6hr_blm0.000001)
-percent_combined_50_6hr_blm0 <- calc_percent_protected(combined_50_6hr_blm0, sprob_combined_50_6hr_blm0)
+industrial_30_blm0.000001 <- raster(industrial_files[5])
+percent_industrial_30_blm0.000001 <- calc_percent_protected(industrial_30_blm0.000001,sprob_industrial_30_6hr_blm0.000001)
+industrial_30_blm0 <- raster(industrial_files[6])
+percent_industrial_30_blm0 <- calc_percent_protected(industrial_30_blm0,sprob_industrial_30_6hr_blm0)
+
+industrial_50_blm0.000001 <- raster(industrial_files[7])
+percent_industrial_50_blm0.000001 <- calc_percent_protected(industrial_50_blm0.000001,sprob_industrial_50_6hr_blm0.000001)
+industrial_50_blm0 <- raster(industrial_files[8])
+percent_industrial_50_blm0 <- calc_percent_protected(industrial_50_blm0,sprob_industrial_50_6hr_blm0)
 
 ```
+
+
+
+
+
+```{r}
+combined_path <- here("final_results", "scenario_4_combined")
+combined_files <- list.files(combined_path, full.names = TRUE)
+
+combined_10_blm0.000001 <- raster(combined_files[1])
+percent_combined_10_blm0.000001 <- calc_percent_protected(combined_10_blm0.000001,sprob_combined_10_6hr_blm0.000001 )
+combined_10_blm0 <- raster(combined_files[2])
+percent_combined_10_blm0 <- calc_percent_protected(combined_10_blm0,sprob_combined_10_6hr_blm0)
+
+combined_20_blm0.000001 <- raster(combined_files[3])
+percent_combined_20_blm0.000001 <- calc_percent_protected(combined_20_blm0.000001,sprob_combined_20_6hr_blm0.000001)
+combined_20_blm0 <- raster(combined_files[4])
+percent_combined_20_blm0 <- calc_percent_protected(combined_20_blm0,sprob_combined_20_6hr_blm0)
+
+combined_30_blm0.000001 <- raster(combined_files[5])
+percent_combined_30_blm0.000001 <- calc_percent_protected(combined_30_blm0.000001,sprob_combined_30_6hr_blm0.000001)
+combined_30_blm0 <- raster(combined_files[6])
+percent_combined_30_blm0 <- calc_percent_protected(combined_30_blm0,sprob_combined_30_6hr_blm0)
+
+combined_50_blm0.000001 <- raster(combined_files[7])
+percent_combined_50_blm0.000001 <- calc_percent_protected(combined_50_blm0.000001,sprob_combined_50_6hr_blm0.000001)
+combined_50_blm0 <- raster(combined_files[8])
+percent_combined_50_blm0 <- calc_percent_protected(combined_50_blm0,sprob_combined_50_6hr_blm0)
+```
+
+
+
+```{r}
+inverse_path <- here("final_results", "scenario_5_inverse")
+inverse_files <- list.files(inverse_path, full.names = TRUE)
+
+inverse_10_blm0.000001 <- raster(inverse_files[1])
+percent_inverse_10_blm0.000001 <- calc_percent_protected(inverse_10_blm0.000001,sprob_combined_inverse_10_6hr_blm0.000001 )
+inverse_10_blm0 <- raster(inverse_files[2])
+percent_inverse_10_blm0 <- calc_percent_protected(inverse_10_blm0,sprob_combined_inverse_10_6hr_blm0)
+
+inverse_20_blm0.000001 <- raster(inverse_files[3])
+percent_inverse_20_blm0.000001 <- calc_percent_protected(inverse_20_blm0.000001,sprob_combined_inverse_20_6hr_blm0.000001)
+inverse_20_blm0 <- raster(inverse_files[4])
+percent_inverse_20_blm0 <- calc_percent_protected(inverse_20_blm0,sprob_combined_inverse_20_6hr_blm0)
+
+inverse_30_blm0.000001 <- raster(inverse_files[5])
+percent_inverse_30_blm0.000001 <- calc_percent_protected(inverse_30_blm0.000001,sprob_combined_inverse_30_6hr_blm0.000001)
+inverse_30_blm0 <- raster(inverse_files[6])
+percent_inverse_30_blm0 <- calc_percent_protected(inverse_30_blm0,sprob_combined_inverse_30_6hr_blm0)
+
+inverse_50_blm0.000001 <- raster(inverse_files[7])
+percent_inverse_50_blm0.000001 <- calc_percent_protected(inverse_50_blm0.000001,sprob_combined_inverse_50_6hr_blm0.000001)
+inverse_50_blm0 <- raster(inverse_files[8])
+percent_inverse_50_blm0 <- calc_percent_protected(inverse_50_blm0,sprob_combined_inverse_50_6hr_blm0)
+```
+
+
+
+
