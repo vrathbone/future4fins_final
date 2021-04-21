@@ -120,7 +120,7 @@ plot(dist_rast)
 
 dist_rescaled <- dist_rast/maxValue(dist_rast)
 
-dist_rescaled[dist_rescaled <= 2.789642e-10] <- 2.789642e-02
+dist_rescaled[dist_rescaled <= 2.789642e-10] <- 0.00001
 
 plot(dist_rescaled)
 
