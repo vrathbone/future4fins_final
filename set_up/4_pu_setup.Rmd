@@ -15,7 +15,13 @@ library(fasterize)
 library(janitor)
 ```
 
+# Planning Units and Locked In & Out Areas
+
+Part of the setup for `Prioritzr` we need to establish our planning units based on the project area and the areas either locked-in or out of the analysis. The actual planning units were already created in `1_MZ_EEZ_raster.Rmd` named `mz_rast_id`, which basically gives each cell in the raster a value. This value will be the same across all rasters created. The existing Marine Protected Areas (MPAs), the Key Biodiversity Areas (KBAs), and Aggregation Sites are rasters that we considered locking in and out of our analysis. Locking-in means that the spatial priorizations will *always include* those areas we locked in, while locking-out will *always exclude* those areas. 
+
 ### **STEP 1: Read in Mozambique EEZ and Shapefile**
+Grabbing the project area from the `1_MZ_EEZ_raster.Rmd` with the cell ids and the shapefiles.
+
 ```{r}
 ## read in MZ EEZ tif
 mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"))
@@ -35,6 +41,8 @@ mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 
 
 ### **STEP 2: Setting up existing marine protected areas**
+Using a shapefile containing the existing MPAs in Mozambique's EEZ provided by WCS, we created a raster based on our `mz_rast_id` raster.
+
 ```{r}
 ## Grab protected area shapefile from computer
 exist_mpa_path <- 'G:/group_project/data/existing_mpas'
@@ -68,11 +76,12 @@ writeRaster(mpa_rast, here('set_up/final_rasters/planning_unit/exist_mpa.tif'), 
 
 
 ### **STEP 3: Set up key biodiversity areas**
+Using a shapefile containing the existing KBAs in Mozambique's EEZ provided by WCS, we created a raster based on our `mz_rast_id` raster.
+
 ```{r}
 ## Read in oil tif from local computer as a raster
 kba_path <- 'G:/group_project/data/kba'
 kba_shape <- list.files(kba_path, full.names = TRUE)
-
 
 ## Read in the shapefile as a simple feature
 kba_sf <- sf::read_sf(kba_shape[6]) 
@@ -102,11 +111,12 @@ writeRaster(kba_rast, here('set_up/final_rasters/planning_unit/kba.tif'), overwr
 
 
 ### **STEP 4: Set up aggregation sites**
+Using a shapefile containing the known aggregation sites in Mozambique's EEZ provided by WCS, we created a raster based on our `mz_rast_id` raster.
+
 ```{r}
 ## Read in oil tif from local computer as a raster
 aggregation_path <- 'G:/group_project/data/aggregation_sites'
 aggregation_shape <- list.files(aggregation_path, full.names = TRUE)
-
 
 ## Read in the shapefile as a simple feature
 aggregation_sf <- sf::read_sf(aggregation_shape[6]) 
@@ -131,12 +141,18 @@ plot(aggregation_rast_agg_per)
 writeRaster(aggregation_rast_agg_per, here('set_up/final_rasters/planning_unit/aggregation_sites.tif'), overwrite = TRUE)
 
 ```
+
+
 Citations:
  - 
  
 Outputs:
 
  - `exist_mpa` = raster of existing MPAs in Mozambique's EEZ 
- - `oil_rig` = raster of existing oil rigs in Mozambique's EEZ
+ - `kba` = raster of existing KBAs in Mozambique's EEZ 
+ - `aggregation_sites` = raster of known aggregation sites in Mozambique's EEZ 
 
 End script.
+
+
+

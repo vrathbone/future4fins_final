@@ -15,7 +15,12 @@ library(fasterize)
 library(janitor)
 ```
 
+# Critical Habitats
+
+In this Rmarkdown, we are creating our critical habitat final rasters which include: coral, seagrass, mangroves, seamounts, and knolls. This will be added to the `Prioritzr` conservation features along with the species distributions created in `2_iucn_species.Rmd`. Other habitat shapefiles can be used following the same setup.
+
 ### **STEP 1: Read in Mozambique EEZ and Shapefile**
+Grabbing the project area from the `1_MZ_EEZ_raster.Rmd` with the cell ids and the 100m resolutions. 
 ```{r}
 ## read in MZ EEZ tif
 mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"))
@@ -40,7 +45,10 @@ mz_rast_100 <- raster(mz_100_shape[1])
 
 ```
 
-### **STEP 2: Read in ACA data for Coral and Seagrass Shapefiles**
+### **STEP 2: Create all habitat rasters**
+The following code goes through how we rasterized each habitat. They all follow similar steps, but in same cases we needed to aggregate the data to be able to view the data. Each finalized habitat raster was saved in the conservation features habitat folder. All raw data was saved on local computer initially so follow personal file path to each data set. More or less habitat can be added if needed. 
+
+#### Read in ACA data for Coral and Seagrass Shapefiles
 ```{r}
 ## Grab aca shapefile from local computer
 ## Path to get data on G shared drive at Bren
@@ -61,7 +69,6 @@ aca_df <- aca_sf %>%
   select(-geometry) 
 ```
 
-### **STEP 3: Create all habitat rasters**
 
 #### CORAL
 ```{r}
@@ -213,7 +220,9 @@ plot(knolls_raster)
 writeRaster(knolls_raster, here('set_up/final_rasters/conservation_features/knolls/knolls.tif'), overwrite = TRUE)
 
 ```
+
 ### **STEP 3: Create raster stack**
+We need one raster that contains all habitat raster for `Prioritzr` so we create a raster stack of the few we created and save.
 
 ```{r}
 ## Create a features stack from all five critical habitats created in the previous steps
@@ -230,6 +239,8 @@ writeRaster(habitat_stack, filename=here("set_up","final_rasters","conservation_
 ```
 
 ### **STEP 4: Combine habitat raster stack and species raster stack to create stack of all conservation features**
+The conservation features for our model is both the critical habitats and species distributions, so we need to create a raster stack of the two raster stack: `species_stack.tif` & `habitat_stack.tif`. 
+
 ```{r}
 ## pull in species stack we created in step 2
 species_stack <- brick(here("set_up", "final_rasters", "conservation_features", "species_stack.tif"))
@@ -249,7 +260,6 @@ writeRaster(features_stack, here('set_up/final_rasters/conservation_features/all
 ```
 
 
-
 Citations:
  - 
  
@@ -266,10 +276,6 @@ Outputs:
 
  
 End script.
-
-
-
-
 
 
 

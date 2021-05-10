@@ -17,7 +17,13 @@ library(janitor)
 library(fasterize)
 ```
 
+# Species Distributions
+
+Our analysis specifically focuses on sharks and rays that inhabit or migrate through the Mozambique's EEZ. From the 180 different species of shark and rays, we examined the species distribution of 27 critically endangered species using IUCN's conservation status and distributions. These distributions will be converted into rasters which will then be used in the conservation features in the `Prioritzr` package. More species can be added to this Rmd, but just need to be added to the species vector. 
+
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
+We set up a file path to our project area raster created in `1_MZ_EEZ_raster.Rmd` due to limited storage on Github. The file path will differ, but here make sure to read in the protect area raster with the cell ids `mz_rast_id` and the project area shapefile `mz_eez_sf`.
+
 ```{r}
 ## read in MZ EEZ tif
 mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"))
@@ -38,6 +44,8 @@ st_crs(mz_eez_sf)
 
 
 #### **STEP 2: Read in IUCN CHONDRICHTHYES Shapefiles**
+To download the IUCN Chronrichthyes spatial data locally, follow this [*link*] (https://www.iucnredlist.org/resources/spatial-data-download).
+
 ```{r}
 ### grab iucn data from local computer
 iucn_path <- 'G:/group_project/data/updated_iucn'
@@ -54,7 +62,13 @@ iucn_df <- iucn_sf %>%
 
 
 #### **STEP 3: Test with Two Species**
+Here are two examples step-by-step for two species, Thresher sharks and Dusky shark, that start as sf objects to final rasters.
+
 ```{r}
+### -----------------
+### Thresher Sharks
+### -----------------
+
 ### create dataframe that only contains species and changes to correct crs
 thresher_shark <- iucn_sf %>% 
   filter(binomial == "Alopias pelagicus") %>% 
@@ -77,6 +91,10 @@ plot(thresher_shark_rast)
 ### masked it to make all values outside the eez = NA
 thresher_shark_rast <- mask(thresher_shark_rast, mz_eez_sf)
 plot(thresher_shark_rast)
+
+### -----------------
+### Dusky Sharks
+### -----------------
 
 ### create dataframe that only contains species and changes to correct crs
 dusky_shark <- iucn_sf %>% 
@@ -110,6 +128,7 @@ plot(shark_rast)
 ```
 
 #### **STEP 4: Create a Function that Creates a Raster for Each Species**
+We created a function that based on the steps above (species sf --> species raster) and saves the raster in our designated folder for finalized species rasters.
 ```{r}
 # #create raster function by species name
 create_rast <- function(iucn_sf, species_name){
@@ -131,6 +150,7 @@ return('yay it works')
 ```
 
 #### **STEP 5: Create Vector of Species Names for Loop**
+This vector contains our focal shark and ray species by scientific name. You can add more or less species to this vector.
 ```{r}
 ### create vector 
 species_name <- c("Alopias pelagicus",
@@ -161,6 +181,7 @@ species_name <- c("Alopias pelagicus",
 ```
 
 #### **STEP 6: Create & Run Loop with Species Vector**
+Here is our loop that contains the `create_rast` function. The loop will cycle through each species name and save the finalized raster in our species folder. 
 ```{r}
 ### create loop 
 for (i in seq_along(species_name)) {
@@ -169,6 +190,7 @@ for (i in seq_along(species_name)) {
 ```
 
 #### **STEP 7: Pull in the three IUCN distributions that were refined with WCS experts**
+Our client suggested using refined species distributions for three of our 27 species: Pseudoginglymostoma brevicaudatum, Rhynchobatus australiae, Rhynchobatus djiddensis. Because these shapefiles are slightly different from the IUCN format, we decided to manually rasterize these distributions instead of using the loop. 
 ```{r}
 ### read in the range map for Pseudoginglymostoma brevicaudatum:
 p_brevicaudatum <-here("set_up", "raw_data", "pseudoginglymostoma_brevicaudatum")
@@ -216,6 +238,7 @@ writeRaster(r_djiddensis_rast, here('set_up/final_rasters/conservation_features/
 
 
 #### **STEP 8: Creating Species Stack** --must clear environment to run this chuck...
+Once we have all our species raster, we need them to be one raster or technically a raster stack for the `Prioritzr` conservation features. To run this, you **must** clear the environment first.
 ```{r}
 ### create file path to read in all 30 species tifs in 
 species_path <- here("set_up", "final_rasters", "conservation_features", "iucn_species")
@@ -233,11 +256,12 @@ writeRaster(species_stack, here('set_up/final_rasters/conservation_features/spec
 ```
 
 Citations:
- - 
+ - IUCN (International Union for Conservation of Nature) 2021. *Chondrichthyes (sharks, rays and chimaeras). The IUCN Red List of Threatened Species*. Version 6.2. https://www.iucnredlist.org. Downloaded on 24 Janurary 2021.
  
 Outputs:
  - `species_XXX XXX` = tif files of each focal species to be used (27 total)
  - `species_stack.tif` = raster stack of all focal species for conservation features
+ 
  
 End script.
 

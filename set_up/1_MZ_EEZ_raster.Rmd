@@ -17,7 +17,11 @@ library(fasterize)
 
 ```
 
-## *STEP 1: Setting up the MZ EEZ File*
+# Establishing the Project Area
+
+Before we can begin our analysis, we need to establish the project area which in this case is Mozambique's Exclusive Economic Zone (EEZ). This shapefile was provided by our client Wildlife Conservation Society (WCS). Similar steps can be followed even with a different project area if initial dataset is a shapefile. 
+
+#### **STEP 1: Setting up the MZ EEZ File**
 ```{r, include=FALSE}
 
 ## Grab Moz Exclusive Economic Zone (EEZ) shapefile from local computer
@@ -46,9 +50,10 @@ mz_ext <- raster::extent(mz_eez_buffer_sf)
 
 ```
 
-### *Create MZ raster with Cell IDs*
-```{r, include=FALSE}
+#### **STEP 2: Create MZ raster with Cell IDs**
+In order to rasterize other shapefiles we will be using in the future, we assigned cell values to our project area raster.
 
+```{r, include=FALSE}
 ## Create raster with cell ids and clip to MZ EEZ raster
 mz_rast_id <- raster::raster(x=mz_ext, crs=crs(mz_eez_sf), res=10000)
 
@@ -74,8 +79,9 @@ writeRaster(mz_rast_id, here('set_up/final_rasters/mz_eez_templates/mz_rast_id.t
 ```
 
 
-### *Create raster with higher res of 1000 m*
-Also need to set up rast id with higher resolution of 1000 m to use when we rasterize some of our conservation feature layers that are at a finer resolution like coral and mangroves
+#### **STEP 3: Create raster with higher res of 1000 m**
+Also we need to set up rast id with higher resolution of 1000 m to use when we rasterize some of our conservation feature layers that are at a finer resolution like coral and mangroves
+
 ```{r, include=FALSE}
 
 ## Create raster with res=100 

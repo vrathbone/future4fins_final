@@ -19,6 +19,10 @@ library(janitor)
 library(fasterize)
 ```
 
+# Cost: Industrial Fishing Pressure
+
+This is the first of many different cost layers we added to our prioritization model. Industrial fishing is a major threat to shark and ray species largely due to bycatch, so we wanted to include it in our analysis. The industrial fishing pressure data is vessel monitoring system (VMS) data provided by our clients WCS and the Mozambique government 
+
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
 ```{r}
 ## read in MZ EEZ tif
@@ -36,6 +40,7 @@ st_crs(mz_eez_sf)
 ## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
 mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 ```
+
 #### **STEP 2: Read in all industrial rasters**
 ```{r}
 #read in tifs as rasters
