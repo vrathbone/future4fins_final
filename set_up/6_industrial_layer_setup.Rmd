@@ -21,9 +21,11 @@ library(fasterize)
 
 # Cost: Industrial Fishing Pressure
 
-This is the first of many different cost layers we added to our prioritization model. Industrial fishing is a major threat to shark and ray species largely due to bycatch, so we wanted to include it in our analysis. The industrial fishing pressure data is vessel monitoring system (VMS) data provided by our clients WCS and the Mozambique government 
+This is the first of many different cost layers we added to our prioritization model. Industrial fishing is a major threat to shark and ray species largely due to bycatch, so we wanted to include it in our analysis. The industrial fishing pressure data we obtained from our clients WCS and the Mozambique government is vessel monitoring system (VMS) data for four different types of vessels: long line, gamba, shrimp, and tuna. Each data set is a separate raster that we combined in order to find total industrial fishing pressure; however, it is possible to run this analysis for each vessel type. 
 
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
+Grabbing the project area from the `1_MZ_EEZ_raster.Rmd` with the cell ids and the shapefiles.
+
 ```{r}
 ## read in MZ EEZ tif
 mz_rast_id <- raster(here("set_up/final_rasters/mz_eez_templates/mz_rast_id.tif"))
@@ -53,6 +55,8 @@ shrimp <- raster(here("set_up", "raw_data", "industrial", "Shrimp_fishing_densit
 tuna <- raster(here("set_up", "raw_data", "industrial", "Tuna_fishing_density_noports.tif"))
 ```
 
+Steps 3-6 are the steps to recreate each vessel type raster. Each raster needed to be reprojected to match the projections of the project area and rescaled to all be from 0-1 to have equally weight. However, `Prioritzr` does not like costs of zero, so we rescaled from 0.0001-1
+
 #### **STEP 3: Recreate Longline Raster**
 ```{r}
 ### reproject the long-line raster to match the mz_rast_id
@@ -76,10 +80,7 @@ plot(long_line_rp)
 long_line_df <- long_line_rp %>% 
   as.data.frame()
 
-### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
-# long_line_rp[long_line_rp == 0] <- 0.0001
-# plot(long_line_rp)
-
+### rescale from 0-1
 long_line_rescaled_df <- long_line_rp %>%
   as.data.frame() %>%
   mutate(longline_convert = case_when(fishing_line_kernel_density_noports < 0.4 ~ 0,
@@ -89,12 +90,11 @@ long_line_rescaled_df <- long_line_rp %>%
                                       TRUE ~ as.numeric(.$longline_rescale))) %>%
   mutate(id = 1:n())
 
-
-### now lets rescale from 0 to 1
+### another way to rescale from 0 to 1
 #long_line_rescaled <- log(long_line_rp+1)/ cellStats(log(long_line_rp+1), max)
 # long_line_rescaled <- long_line_rp/maxValue(long_line_rp)
-# 
-# ## let's check it again
+#
+### let's check it again
 # long_line_rescaled_df <- long_line_rescaled %>% 
 #   as.data.frame()
 
@@ -125,6 +125,7 @@ gamba_df <- gamba_rp %>%
 gamba_rp <- mask(gamba_rp, mz_eez_sf)
 plot(gamba_rp)
 
+### rescale from 0-1
 gamba_rescaled_df <- gamba_rp %>%
   as.data.frame() %>%
   mutate(gamba_convert = case_when(Gamba_fishing_density_noports < .52 ~ 0,
@@ -134,28 +135,20 @@ gamba_rescaled_df <- gamba_rp %>%
                                       TRUE ~ as.numeric(.$gamba_rescale))) %>%
   mutate(id = 1:n())
 
+### another way to rescale from 0 to 1
+# #gamba_rescaled <- log(gamba_rp+1)/ cellStats(log(gamba_rp+1), max)
+# gamba_rescaled <- gamba_rp/maxValue(gamba_rp)
+
+### let's check it again
+# gamba_rescaled_df <- gamba_rescaled %>% 
+#   as.data.frame()
+
 gamba_rescaled <- subs(mz_rast_id, gamba_rescaled_df, by = 'id', which = 'gamba_nonzero')
 
 plot(gamba_rescaled)
 
-### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
-# gamba_rp[gamba_rp == 0] <- 0.0001
-# plot(gamba_rp)
-# 
-# ## let's check it!
-# gamba_df <- gamba_rp %>% 
-#   as.data.frame()
-# 
-# ### now lets rescale from 0 to 1
-# #gamba_rescaled <- log(gamba_rp+1)/ cellStats(log(gamba_rp+1), max)
-# gamba_rescaled <- gamba_rp/maxValue(gamba_rp)
-# 
-# ## let's check it again
-# gamba_rescaled_df <- gamba_rescaled %>% 
-#   as.data.frame()
-
-
 ```
+
 #### **STEP 5: Recreate Shrimp Raster**
 ```{r}
 ### reproject the shrimp raster to match the mz_rast_id
@@ -177,6 +170,7 @@ shrimp_df <- shrimp_rp %>%
 shrimp_rp  <- mask(shrimp_rp, mz_eez_sf)
 plot(shrimp_rp)
 
+### rescale from 0-1
 shrimp_rescaled_df <- shrimp_rp %>%
   as.data.frame() %>%
   mutate(shrimp_convert = case_when(Shrimp_fishing_density_noports < 2.5 ~ 0,
@@ -186,27 +180,19 @@ shrimp_rescaled_df <- shrimp_rp %>%
                                       TRUE ~ as.numeric(.$shrimp_rescale))) %>%
   mutate(id = 1:n())
 
+### another way to rescale from 0 to 1
+# #shrimp_rescaled <- log(shrimp_rp+1)/ cellStats(log(shrimp_rp+1), max)
+# shrimp_rescaled <- shrimp_rp/maxValue(shrimp_rp)
+
+### let's check it again
+# shrimp_rescaled_df <- shrimp_rescaled %>% 
+#   as.data.frame()
+
+# plot(shrimp_rescaled)
+
 shrimp_rescaled <- subs(mz_rast_id, shrimp_rescaled_df, by = 'id', which = 'shrimp_nonzero')
 
 plot(shrimp_rescaled)
-
-### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
-# shrimp_rp[shrimp_rp == 0] <- 0.0001
-# plot(shrimp_rp)
-# 
-# ## let's check it!
-# shrimp_df <- shrimp_rp %>% 
-#   as.data.frame()
-# 
-# ## now lets rescale from 0 to 1
-# #shrimp_rescaled <- log(shrimp_rp+1)/ cellStats(log(shrimp_rp+1), max)
-# shrimp_rescaled <- shrimp_rp/maxValue(shrimp_rp)
-# 
-# ## let's check it again
-# shrimp_rescaled_df <- shrimp_rescaled %>% 
-#   as.data.frame()
-# 
-# plot(shrimp_rescaled)
 
 ```
 
@@ -231,6 +217,7 @@ tuna_df <- tuna_rp %>%
 tuna_rp  <- mask(tuna_rp, mz_eez_sf)
 plot(tuna_rp)
 
+### rescale from 0-1
 tuna_rescaled_df <- tuna_rp %>%
   as.data.frame() %>%
   mutate(tuna_convert = case_when(Tuna_fishing_density_noports < 2.3 ~ 0,
@@ -241,7 +228,7 @@ tuna_rescaled_df <- tuna_rp %>%
   mutate(id = 1:n())
 
 
-### now lets rescale from 0 to 1
+### another way to rescale from 0 to 1
 #long_line_rescaled <- log(long_line_rp+1)/ cellStats(log(long_line_rp+1), max)
 # long_line_rescaled <- long_line_rp/maxValue(long_line_rp)
 # 
@@ -254,25 +241,11 @@ tuna_rescaled <- subs(mz_rast_id, tuna_rescaled_df, by = 'id', which = 'tuna_non
 plot(tuna_rescaled)
 
 
-### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
-# tuna_rp[tuna_rp == 0] <- 0.0001
-# plot(tuna_rp)
-# 
-# ## let's check it!
-# tuna_df <- tuna_rp %>% 
-#   as.data.frame()
-# 
-# ## now lets rescale from 0 to 1
-# #tuna_rescaled <- log(tuna_rp+1)/ cellStats(log(tuna_rp+1), max)
-# tuna_rescaled <- tuna_rp/maxValue(tuna_rp)
-# 
-# ## let's check it again
-# tuna_rescaled_df <- tuna_rescaled %>% 
-#   as.data.frame()
-
 ```
 
 #### **STEP 7: Create a raster stack**
+Like the conservation features, the costs can only be one raster or a raster stack, so the next step is to create a raster stack off these four rasters. Then, rescale once again so it is 0-1 rather than 0-4. 
+
 ```{r}
 ## create raster stack of all industrial layers
 industrial_stack <-  stack(long_line_rescaled, gamba_rescaled, shrimp_rescaled, tuna_rescaled)
@@ -303,6 +276,7 @@ writeRaster(industrial_stack_sum, here('set_up/final_rasters/costs/cost_industri
 ```
 
 
+An interactive map of the final industrial fishing pressure raster
 ```{r}
 tmap_mode("view") # Set to interactive viewing
 

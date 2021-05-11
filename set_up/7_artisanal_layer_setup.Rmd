@@ -15,6 +15,10 @@ library(stringr)
 library(janitor)
 ```
 
+# Cost: Artisanal Fishing Pressure
+
+
+
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
 ```{r}
 ## read in MZ EEZ tif
@@ -34,8 +38,6 @@ mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 ```
 
 
-#### Cost Layer
-Other scenarios will require more prep to create cost layer, so they will be found in separate Rmarkdowns. Since this scenario is so short, we created it in this Rmarkdown.
 ```{r}
 ### pull in the artisanal fishing pressure tif file from costs folder in repo
 art_fish_rast <- raster(here("set_up", "raw_data", "artisanal", "kernel_d_fishing_moz_v2.tif"))
@@ -59,21 +61,6 @@ plot(art_fish)
 art_fish <- mask(art_fish, mz_eez_sf)
 plot(art_fish)
 
-### Prioritzr also doesn't like cost values of 0 so now let's change any 0 values in the EEZ to 0.0001
-# values(art_fish)[values(art_fish == 0)] = 0.001
-# plot(art_fish)
-# #art_fish_rescaled[art_fish_rescaled == 0] <- 500
-
-### now let's check it #x100 method
-# art_fish_df <- art_fish %>% 
-#   as.data.frame() %>%
-#   mutate(artisanal_rescale = kernel_d_fishing_moz_v2/max(kernel_d_fishing_moz_v2, na.rm = TRUE)*100) %>% 
-#   mutate(artisanal_nozero = case_when(artisanal_rescale == 0 ~ .1, 
-#                                       artisanal_rescale < 0.5 ~ .1,
-#                                       TRUE ~ as.numeric(.$artisanal_rescale))) %>% 
-#   mutate(id = 1:n())
-
-
 ### now let's check it #0-1 method
 art_fish_df <- art_fish %>% 
   as.data.frame() %>%
@@ -83,24 +70,19 @@ art_fish_df <- art_fish %>%
   mutate(artisanal_nonzero = case_when(artisanal_rescale == 0 ~ .0001, 
                                       TRUE ~ as.numeric(.$artisanal_rescale))) %>% 
   mutate(id = 1:n())
-  
 
-### now that we've changed the zeros and rescaled, convert back to a raster
-art_fish_rescaled <- subs(mz_rast_id, art_fish_df, by = 'id', which = 'artisanal_nonzero')
-plot(art_fish_rescaled)
-
-
-### now lets rescale from 0 to 1
+### another way to rescale from 0 to 1
 #art_fish_rescaled <- log(art_fish+1)/ cellStats(log(art_fish+1), max)
 # art_fish_rescaled <- art_fish/maxValue(art_fish)
 # plot(art_fish_rescaled)
 
-
-
-
 ### let's check it again!
 # art_fish_rescaled_df <- art_fish_rescaled %>% 
 #   as.data.frame() 
+
+### now that we've changed the zeros and rescaled, convert back to a raster
+art_fish_rescaled <- subs(mz_rast_id, art_fish_df, by = 'id', which = 'artisanal_nonzero')
+plot(art_fish_rescaled)
 
 ## Looks good lets save as a tif
 writeRaster(art_fish_rescaled, here('set_up/final_rasters/costs/cost_art_fish.tif'), overwrite = TRUE)
