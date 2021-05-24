@@ -16,15 +16,6 @@ library(tmap)
 library(ggmap)
 ```
 
-*NOT SURE IF WE ACTUALLY NEED TO INCLUDE THIS FOR JUST LOOKING AT OCCURRENCE DATA*
-
-Notes from Dave:
- - We remove any samples if they are more than 40% obscured, as there is a good chance we can't see any sharks/rays due to the obstruction (look in column titled "% obstruction";
- - Some of the BRUV deployments did not film for the full 60 min, for whatever reason. As such, we use a cut off point of 80% to include the record in the analysis. I.e. if the video records for 60*80% = 48 min or more, then we keep it in the analysis. If less than 48 min, remove from analysis;
- - For MaxN, only use the data from those records which say "Analysis" under the "Period" column. Any records which say "Extra time" or "On descent" should not be included in the analysis, however these can be used to see what species occur in a certain area.
- - In the "Length data" sheet, I noticed that the lengths were not correct. We have sorted this out, whereby there is a new column called "Final length (mm)". For sharks this final length = FL and for rays = DW. If you need TL for sharks, you can find lenght-length equations on Fishbase for many (but not all) the species, to work out TL from FL. I have attached the spreadsheet again, which includes the Final FL/DW for the individuals measured. 
- -  also forgot to mention, in addition to removing the obscured and deployments that fall under 48 min, also look at "Orientation". Any BRUVs that are facing "Up" (i.e. pointed towards the sea surface) must be removed for the analysis too, as these are essentially filming a different habitat (the pelagic habitat), and so should not be included together with the other samples.
-
 ## *WCS BRUV MaxN data*
 Unsure about the length sheet...
 
@@ -96,31 +87,6 @@ tm_shape(wcs_bruv_sf_maxn) +
 
 ```
 
-
-### Erin Noodling
-```{r, include = FALSE}
-wcs_bruv_tofo <- wcs_mz_bruv_maxn %>% 
-  filter(area == "Praia do Tofo") %>% 
-  select(lat_x, long_y,genus_species) %>% 
-  drop_na(long_y) %>%  # had to remove NAs for the next function to work
-  mutate(id=1:n()) 
-
-wcs_bruv_tofo$genus_species[is.na(wcs_bruv_tofo$genus_species)] <- "Unknown"
-
-wcs_bruv_sf_tofo  <-  st_as_sf(wcs_bruv_tofo, coords = c("long_y", "lat_x"), crs= 4326) %>% 
-  st_transform(., crs = st_crs(mz_eez_sf)) # tranform to match the mz_eez crs
-
-eez_crop <- st_crop(mz_eez_sf, xmin = 28, xmax = 41, ymax = -26, ymin = -22) 
-
-#basemap
-#tofo_basemap <- get_map(location=c(lon = -24, lat = 35.4), zoom=11, maptype = 'terrain-background', source = 'stamen')
-
-ggplot() +
-  geom_sf(data = eez_crop) +
-  geom_sf(data = wcs_bruv_sf_tofo, aes(color = genus_species),
-          show.legend = FALSE)
-  #coord_sf(xlim = c(32, 37), ylim = c(22, 26), expand = FALSE)
-```
 
 ### *STEP 4: Create a sp object and raster of BRUV data*
 Because we are dealing with point data, we cannot use fasterize to create a raster. Instead, we convert the `sf` simple features to `sp` Spatial objects and then use rasterize to create a raster. 
@@ -214,13 +180,13 @@ writeRaster(popmr_bruv_rast, here('set_up/final_rasters/bruv/popmr_bruv.tif'), o
 
 
 ## *Northern Mozambique BRUV data*
-Follow the same steps as above. *THIS DATASET IS OVER 1 MILLION OBSERVATIONS DON'T PUT ON GITHUB*
+Follow the same steps as above. **THIS DATASET IS OVER 1 MILLION OBSERVATIONS DON'T PUT ON GITHUB**
 
 ### *STEP 1: Read in NM BRUV data*
 ```{r, include = FALSE}
 #read in data
-nm_bruv <- read_csv(here("set_up", "csv_files", "Northern_Mozambique_dataset_2020-11-25.csv")) %>% 
-  clean_names() %>% 
+nm_bruv <- read_csv(here("set_up", "csv_files", "Northern_Mozambique_dataset_2020-11-25.csv")) %>%
+  clean_names() %>%
   select(sample_code, lat, long) %>% #select only the sample code, lat, and long
   drop_na(sample_code)%>%  # had to remove NAs for the next function to work
   mutate(id=1:n())
@@ -232,8 +198,8 @@ Look at code above.
 ### *STEP 3: Create a sf object of BRUV data*
 ```{r, include = FALSE}
 
-## Convert the data frame to a simple features object (sf) to create a geometry for each id
-nm_bruv_sf  <-  st_as_sf(nm_bruv, coords = c("long", "lat"), crs= 4326) %>% 
+# Convert the data frame to a simple features object (sf) to create a geometry for each id
+nm_bruv_sf  <-  st_as_sf(nm_bruv, coords = c("long", "lat"), crs= 4326) %>%
   st_transform(., crs = st_crs(mz_eez_sf)) # tranform to match the mz_eez crs
 
 ## check to make sure it matches
@@ -253,7 +219,7 @@ tm_shape(nm_bruv_sf) +
 ### *STEP 4: Create a sp object and raster of BRUV data*
 Because we are dealing with point data, we cannot use fasterize to create a raster. Instead, we convert the `sf` simple features to `sp` Spatial objects and then use rasterize to create a raster. 
 ```{r, include = FALSE}
-## check the class of sf
+# check the class of sf
 class(nm_bruv_sf)
 
 ## change to a sp object
@@ -265,7 +231,7 @@ class(nm_bruv_sp)
 ## double check that this matches your RASTER file (which should be the same as the sf)
 crs(nm_bruv_sp)
 
-## make a raster 
+## make a raster
 nm_bruv_rast <- raster::rasterize(nm_bruv_sp, mz_rast_id, field = "id")
 
 ## plot to see what it looks like

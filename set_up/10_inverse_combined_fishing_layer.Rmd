@@ -16,49 +16,64 @@ library(fasterize)
 library(stringr)
 library(janitor)
 library(spatialEco)
+library(tmap)
 ```
 
+# Cost: Inverse Fishing Pressure
+In order to maximize the protection of sharks and rays from areas of high fishing pressure we also created an inverse of this combined fishing pressure cost layer. For this, we used the inverse of the combined fishing cost layer so that our model prioritized protection of areas with the highest fishing pressure and rescaled it between 0 and 1, where 0 was areas with the lowest fishing pressure and 1 was areas with the highest fishing pressure.
 
+#### **STEP 1: Read in data**
 ```{r}
-#Call Artisanal
-```
-
-```{r}
-#Create "new" industrial
-```
-
-```{r}
-#Combine
-
-##Method 1 - Simple; just inverse the other combined layer
+## read in combined fishing pressure 
 combined_inverse_simple <- raster(here("set_up", "final_rasters", "costs", "combined_stack_sum.tif"))
-
 plot(combined_inverse_simple)
 
+## read in summed industrial fishing pressure (not rescaled)
+industrial_cumulative <- brick(here('set_up/final_rasters/costs/cost_industrial_sum_unscaled.tif'))
+plot(industrial_cumulative)
+
+## read in artisanal fishing pressure
+artisanal <- raster(here('set_up/final_rasters/costs/cost_art_fish.tif'))
+plot(artisanal)
+```
+
+#### **STEP 2: Created Inverse Layer**
+
+Method 1 - Simple; just inverse the other combined layer
+```{r}
+## invert raster layer using `raster.invert`
 combined_inverse_simple_rast <- raster.invert(combined_inverse_simple)
 
+## check it out!
 plot(combined_inverse_simple_rast)
 
+## save it
 writeRaster(combined_inverse_simple_rast, here("set_up", "final_rasters", "costs", "combined_inverse_simple.tif"), overwrite = TRUE)
-
-##Method 2 - Cumulative; use the unrescaled industrial and combine with artisanal
-industrial_cumulative <- brick(here('set_up/final_rasters/costs/cost_industrial_sum_unscaled.tif'))
-
-artisanal <- raster(here('set_up/final_rasters/costs/cost_art_fish.tif'))
-
-combined_inverse_cumulative <- stack(industrial_cumulative, artisanal)
-
-plot(combined_inverse_cumulative)
-
-combined_sum_2 <- calc(combined_inverse_cumulative, fun = sum)
-
-combined_sum_inverse <- raster.invert(combined_sum_2)
-plot(combined_sum_inverse)
-
-writeRaster(combined_sum_inverse, here("set_up", "final_rasters", "costs", "combined_inverse_complex.tif"), overwrite = TRUE)
 
 ```
 
+Method 2 - Cumulative; use the unrescaled industrial and combine with artisanal (not used in our analysis)
+```{r}
+## create a raster stack of industrial and artisanal
+combined_inverse_cumulative <- stack(industrial_cumulative, artisanal)
+
+## plot it
+plot(combined_inverse_cumulative)
+
+## add layers together
+combined_sum_2 <- calc(combined_inverse_cumulative, fun = sum)
+
+## invert summed raster layer
+combined_sum_inverse <- raster.invert(combined_sum_2)
+
+## plot it!
+plot(combined_sum_inverse)
+
+## save it
+writeRaster(combined_sum_inverse, here("set_up", "final_rasters", "costs", "combined_inverse_complex.tif"), overwrite = TRUE)
+```
+
+Wow another interactive map!
 ```{r}
 tmap_mode("view") # Set to interactive viewing
 
@@ -68,3 +83,12 @@ tm_shape(combined_inverse_simple_rast) +
   
 ```
 
+Citations:
+ - 
+ 
+Outputs:
+
+ - `combined_inverse_simple.tif` = inverse raster of combined fishing pressure (simple method)
+ - `combined_inverse_complex.tif` = inverse raster of combined fishing pressure (complex method)
+
+End script.

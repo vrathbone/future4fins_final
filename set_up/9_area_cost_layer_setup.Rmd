@@ -16,6 +16,9 @@ library(janitor)
 library(tmap)
 ```
 
+# Cost: Area
+To explore an optimal conservation design that does not consider costs to specific stakeholders we used planning unit area as a surrogate for cost. Since our planning units are uniform in size, we set the cost to be uniform across our entire project area. This uniform cost will not give us useful solutions that minimize a cost to any stakeholder, however, we can use this as a baseline scenario against which our other outputs could be compared as we add more complex costs.
+
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
 ```{r}
 ## read in MZ EEZ tif
@@ -34,8 +37,7 @@ st_crs(mz_eez_sf)
 mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 ```
 
-#### Cost Layer
-Other scenarios will require more prep to create cost layer, so they will be found in separate Rmarkdowns. Since this scenario is so short, we created it in this Rmarkdown. 
+#### **STEP 2: Assign raster values**
 ```{r}
 ### pull in the initial MZ EEZ raster to start with
 area_raster <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
@@ -54,6 +56,7 @@ plot(cost_area)
 writeRaster(cost_area, here('set_up/final_rasters/costs/area_cost.tif'), overwrite = TRUE)
 ```
 
+Another interactive map!
 ```{r}
 tmap_mode("view") # Set to interactive viewing
 
@@ -63,7 +66,14 @@ tm_shape(cost_area) +
   
 ```
 
+Citations:
+ - 
+ 
+Outputs:
 
+ - `area_cost.tif` = raster of area cost layer
+
+End script.
 
 
 

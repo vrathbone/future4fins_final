@@ -17,8 +17,8 @@ library(janitor)
 library(fasterize)
 ```
 
-
-IUCN. (2018). The IUCN Red List of threatened species. Version 2018-1. Retrieved from http://www.iucnredlist.org
+# Extra Cost: Species Status
+This cost layer looks at prioritizing species with more at risk conservation status. This was just an exploration and was not used in our final analysis.
 
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
 ```{r}
@@ -35,8 +35,6 @@ mz_eez_sf <- sf::read_sf(mz_shape[6])
 ## check coordinate system
 st_crs(mz_eez_sf)
 
-## Add a buffer of 10 km to make sure cells on the outer edges of the EEZ are included
-#mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 ```
 
 #### **STEP 2: Read in IUCN CHONDRICHTHYES Shapefiles**
@@ -55,7 +53,7 @@ iucn_df <- iucn_sf %>%
 ```
 
 
-
+#### **STEP 3: Reclassifying based on conservation category/status**
 ```{r}
 ### reclassify status
 risk_df <- iucn_sf  %>% 
@@ -63,7 +61,7 @@ risk_df <- iucn_sf  %>%
                           category == "EN" ~2,
                           category == "VU"~ 1))
 
-
+### check to see if it works with thresher sharks
 ### create dataframe that only contains species and changes to correct crs
 thresher_shark <- risk_df %>%
   filter(binomial == "Alopias pelagicus") %>% 
@@ -81,7 +79,8 @@ plot(thresher_shark_rast)
 
 ```
 
-
+#### **STEP 4: Create a Function that Creates a Raster for Each Species**
+We created a function that based on the steps above (species sf --> species raster) and saves the raster in our designated folder for finalized species rasters using risk level instead 
 ```{r}
 create_rast_status <- function(risk_df, species_name){
   outfile <- sprintf(here('set_up/final_rasters/conservation_features/iucn_species_status/species_%s.tif'), species_name)
@@ -105,6 +104,8 @@ return('yay it works')
 
 ```
 
+#### **STEP 5: Create Vector of Species Names for Loop**
+This vector contains our focal shark and ray species by scientific name. You can add more or less species to this vector.
 ```{r}
 ### create vector 
 species_name <- c("Alopias pelagicus",
@@ -133,6 +134,7 @@ species_name <- c("Alopias pelagicus",
                  "Acroteriobatus leucospilus")
 ```
 
+#### **STEP 6: Create & Run Loop with Species Vector**
 ```{r}
 ### create loop 
 for (i in seq_along(species_name)) {
@@ -140,9 +142,9 @@ for (i in seq_along(species_name)) {
 }
 ```
 
-#### **STEP 8: Creating Species Stack** --must clear environment to run this chuck...
+#### **STEP 7: Creating Species Stack** --must clear environment to run this chuck...
 ```{r}
-### create file path to read in all 30 species tifs in 
+### create file path to read in all 27 species tifs in 
 species_status_path <- here("set_up", "final_rasters", "conservation_features", "iucn_species_status")
 species_status_files <- list.files(species_status_path, full.names = TRUE)
 
@@ -158,5 +160,14 @@ writeRaster(species_status_stack, here('set_up/final_rasters/conservation_featur
 ```
 
 
+Citations:
+ - IUCN (International Union for Conservation of Nature) 2021. *Chondrichthyes (sharks, rays and chimaeras). The IUCN Red List of Threatened Species*. Version 6.2. https://www.iucnredlist.org. Downloaded on 24 Janurary 2021.
+ 
+Outputs:
+ - `species_XXX XXX` = tif files of each focal species to be used with risk level as weight (27 total)
+ - `species_status_stack.tif` = raster stack of all focal species for conservation features with risk level
+ 
+ 
+End script.
 
 

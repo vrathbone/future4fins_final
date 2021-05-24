@@ -17,11 +17,12 @@ library(fasterize)
 library(stringr)
 library(janitor)
 library(fasterize)
+library(tmap)
 ```
 
 # Cost: Industrial Fishing Pressure
 
-This is the first of many different cost layers we added to our prioritization model. Industrial fishing is a major threat to shark and ray species largely due to bycatch, so we wanted to include it in our analysis. The industrial fishing pressure data we obtained from our clients WCS and the Mozambique government is vessel monitoring system (VMS) data for four different types of vessels: long line, gamba, shrimp, and tuna. Each data set is a separate raster that we combined in order to find total industrial fishing pressure; however, it is possible to run this analysis for each vessel type. 
+This is the first of many different cost layers we added to our prioritization model. Industrial fishing is a major threat to shark and ray species largely due to bycatch, so we wanted to include it in our analysis. This layer was created using VMS data provided by the Mozambique government as a proxy for industrial fishing effort. The VMS data was point data from vessels across four industrial fisheries - long-line, shrimp, gamba, and tuna. The point data were smoothed into a kernel density raster for each fishing gear. Since the VMS data were not comprehensive, the kernel density surface was used to interpolate values where there are no fishing points within a search radius. In this way, areas with lots of fishing points receive high values, areas with fewer points receive low values, and areas beyond a 20-km search radius receive values of 0. We log transformed each of the industrial fishing layers and rescaled them between 0 and 1 to put them on a unitless scale that allows direct comparison across cost layers. We then combined them into one cumulative industrial fishing pressure layer and rescaled the cumulative layer between 0 and 1.
 
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
 Grabbing the project area from the `1_MZ_EEZ_raster.Rmd` with the cell ids and the shapefiles.
@@ -276,7 +277,7 @@ writeRaster(industrial_stack_sum, here('set_up/final_rasters/costs/cost_industri
 ```
 
 
-An interactive map of the final industrial fishing pressure raster
+For fun... an interactive map of the final industrial fishing pressure raster!
 ```{r}
 tmap_mode("view") # Set to interactive viewing
 
@@ -286,6 +287,16 @@ tm_shape(industrial_stack_sum_rescaled) +
   
 ```
 
+Citations:
+ - 
+ 
+Outputs:
+
+ - `cost_industrial_sum.tif` = raster of summed and rescaled industrial fishing pressure
+ - `cost_industrial_sum_unscaled.tif` = raster of summed industrial fishing pressure (not rescaled)
+
+
+End script.
 
 
 

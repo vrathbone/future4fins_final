@@ -13,7 +13,12 @@ library(here)
 library(fasterize)
 library(stringr)
 library(janitor)
+library(tmap)
 ```
+
+# Cost: Combined Fishing Pressure
+To minimize the impacts and conflicts that marine protected areas have on all fishers in Mozambique’s EEZ, artisanal and industrial, we created a combined fishing pressure layer. The Mozambique government has expressed their intention to minimize the impact of MPAs on fishers, presumably both artisanal and industrial, and therefore avoid conflict resulting from MPAs placed in areas with high fishing pressure. Since the aim of this layer is to prioritize outputs that avoid overlap with high fishing pressure areas, artisanal and industrial fishers were weighted equally. We combined the artisanal and industrial fishing pressure layers and rescaled the cumulative layer between 0 and 1. 
+
 
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
 ```{r}
@@ -45,6 +50,7 @@ industrial_sum_rescaled <- raster(here("set_up", "final_rasters", "costs", "cost
 
 
 #### **STEP 4: Create raster stack of all fishing**
+`Prioritzr` only likes one cost layer, so we create a raster stack of all fishing.
 ```{r}
 ### create raster stack
 combined_fishing_stack <- stack(industrial_sum_rescaled, art_fish_rast)
@@ -55,16 +61,17 @@ plot(combined_fishing_stack)
 combined_stack_sum <- calc(combined_fishing_stack, fun = sum)
 plot(combined_stack_sum)
 
-
+### save sum 
 writeRaster(combined_stack_sum, here('set_up/final_rasters/costs/combined_stack_sum.tif'), 
             overwrite = TRUE)
 
-### save it
+### save stack
 writeRaster(combined_fishing_stack, here('set_up/final_rasters/costs/combined_fishing_stack.tif'), 
             options="INTERLEAVE=BAND",
             overwrite = TRUE)
 ```
 
+For even more fun... an interactive map of combined fishing pressure!
 ```{r}
 tmap_mode("view") # Set to interactive viewing
 
@@ -74,20 +81,28 @@ tm_shape(combined_stack_sum) +
   
 ```
 
+# Cost: Bell Curve
+We started exploring looking at the bell curve approach to find a middle ground between fishing pressure and conservation features. Based on our combined fishing pressure cost layer, we found the middle values (0.1-0.2) and made them the least costly so they would be prioritized in our model. We did not run this analysis using `Prioritzr` and it was not presented in our report due to time constraint. However, it was fun thinking about an alternative approach that could maximize protection for shark and rays as well as keep the local fishermen's most productive fishing grounds. 
+
+
 #### Exploring the bell curve
 ```{r}
-## create plot that matches arcgis
+### create plot that matches arcgis
+
+### convert raster to df
 combined_stack_sum_df <- rasterToPoints(combined_stack_sum) %>% 
   as.data.frame()
 
+### plot it like the final version in arcgis
 ggplot()+
   geom_raster(data = combined_stack_sum_df, aes(x,y, fill = layer))+
   geom_sf(data = mz_eez_sf, fill = NA)+
-  scale_fill_continuous(type = "viridis",breaks =  c(0,0.02,0.1,0.2,.44,1))
+  scale_fill_continuous(type = "viridis",breaks =  c(0,0.02,0.1,0.2,.44,1))+
+  theme_minimal()
 
 ```
-
-Made the middle ground values (0.1-0.2) or yellow in our Arc Maps the highest values (can't remember if it should be the highest or lowest but it's an easy switch).
+#### Reclassifying the values
+Made the middle ground values (0.1-0.2) or yellow in our Arc Maps the lowest values (least costly)
 ```{r}
 m <- c(0.00, 0.02, 4,    
        0.02, 0.1, 2,    
@@ -98,22 +113,15 @@ m <- c(0.00, 0.02, 4,
 ### wrap the vector into a matrix by rows
 rcl_mtx <- matrix(m, ncol=3, byrow=TRUE)
 
+### use raster::reclassify() to reclassify the values 
 combined_reclass <- reclassify(combined_stack_sum, rcl_mtx)
 plot(combined_reclass)
 
+### check if it worked
 combined_reclass_df <- rasterToPoints(combined_reclass) %>% 
   as.data.frame()
 
-## change values
-# combined_bell_curve <- combined_stack_sum_df %>% 
-#   rename(pressure = layer) %>% 
-#   mutate(bell_curve_pressure = case_when(pressure <= 0.02 ~ 1,
-#                                          pressure > 0.02 & pressure <= 0.1 ~ 3,
-#                                          pressure > 0.1 & pressure <= 0.2 ~ 5,
-#                                          pressure > 0.2 & pressure <= 0.44 ~ 4,
-#                                          pressure > 0.44 ~ 2)) %>% 
-#   mutate(id = 1:n())
-# 
+### plot it! the darkest color should be the least costly
 ggplot()+
   geom_raster(data = combined_reclass_df, aes(x,y, fill = layer))+
   geom_sf(data = mz_eez_sf, fill = NA)+
@@ -122,8 +130,10 @@ ggplot()+
 writeRaster(combined_reclass, here('set_up/final_rasters/costs/combined_reclass.tif'), 
             overwrite = TRUE)
 ```
-
+#### Distance Decay
+Using the least costly areas found above, we used the `raster::distance` to create a distance decay. This means that the further away from the least costly area, the greater the cost.
 ```{r}
+### creating a matrix that makes all values beside 0.1-0.2 (middle ground area) NA -- all other values need to be NA for distance decay to work
 m_dist <- c(0.00, 0.02, NA,    
        0.02, 0.1, NA,    
        0.1, 0.2, 1,
@@ -133,33 +143,31 @@ m_dist <- c(0.00, 0.02, NA,
 ### wrap the vector into a matrix by rows
 rcl_mtx_dist <- matrix(m_dist, ncol=3, byrow=TRUE)
 
+### reclassify values
 combined_reclass_dist <- reclassify(combined_stack_sum, rcl_mtx_dist)
 plot(combined_reclass_dist)
 
 ## use the raster::distance() function, which calculates a distance for every NA cell to the nearest non-NA cell.
-combined_dist_rast <- raster::distance(combined_reclass_dist) %>% 
+combined_reclass_dist_rast <- raster::distance(combined_reclass_dist) %>% 
   mask(mz_eez_sf) # mask so the land distances are not calculated
 
 ## plot it!
-plot(combined_dist_rast)
+plot(combined_reclass_dist_rast)
 
 ### save it
-writeRaster(combined_dist_rast, here('set_up/final_rasters/costs/combined_dist_rast.tif'), overwrite = TRUE)
+writeRaster(combined_dist_rast, here('set_up/final_rasters/costs/combined_reclass_dist_rast.tif'), overwrite = TRUE)
 ```
 
+Citations:
+ - 
+ 
+Outputs:
 
+ - `combined_stack_sum.tif` = raster of summed combined fishing pressure
+ - `combined_fishing_stack.tif`= raster of stacked combined fishing pressure
+ - `combined_reclass.tif` = raster of reclassifed combined fishing pressure (bell-curve)
+ - `combined_reclass_dist_rast.tif`= distance decay raster of reclassified combined fishing pressure (bell-curve)
 
-
-
-
-
-
-
-
-
-
-
-
-
+End script.
 
 

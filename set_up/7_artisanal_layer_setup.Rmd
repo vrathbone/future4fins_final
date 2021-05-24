@@ -13,9 +13,11 @@ library(here)
 library(fasterize)
 library(stringr)
 library(janitor)
+library(tmap)
 ```
 
 # Cost: Artisanal Fishing Pressure
+Another cost we considered was artisanal fishing pressure. To create proxy, we used district level fishing effort from 2017, measured in fishing days, and country-wide mean distance traveled by fishers to assign a fishing pressure value to each cell within the travel range. We set points at 1 km intervals along the entire coastline and for each district, divided the total effort by the number of coastal points within that district, so that each point along the coast had a fishing effort assigned to it. Next, we used the Kernel Density tool within ArcGIS with these inputs to create a search radius to distribute this fishing effort from each coastal point. Based on information provided by the Mozambique government, the average maximum distance traveled by artisanal fishers is 15-km. For each 1-km ocean cell in the output, the kernel density function searched within a 15-km radius and summed the values of any coastal district points. As such, the further an ocean cell was from shore, the fewer points were likely to be included, which is why the fishing effort values decreased further offshore. After 15-km to any shoreline, the fishing effort is zero. This Rmarkdown walks through how we wrangle this cost layer to be use in `Prioritzr`
 
 
 
@@ -37,11 +39,16 @@ st_crs(mz_eez_sf)
 mz_eez_buffer_sf <- sf::st_buffer(mz_eez_sf, dist = 10000)
 ```
 
-
+#### **STEP 2: Read in artisanal fisheries raster**
 ```{r}
 ### pull in the artisanal fishing pressure tif file from costs folder in repo
 art_fish_rast <- raster(here("set_up", "raw_data", "artisanal", "kernel_d_fishing_moz_v2.tif"))
+```
 
+
+#### **STEP 3: Recreate Artisanal Raster**
+This includse reprojecting the artisanal fishing raster to match crs of our planning units, removing zero values, and rescaling from 0-1 
+```{r}
 ### now we need to grab the Moz raster we previously created to make sure the artisanal fishing raster is in the right projections
 art_fish <- raster::projectRaster(art_fish_rast, mz_rast_id, 
                                   res = 10000, 
@@ -89,6 +96,7 @@ writeRaster(art_fish_rescaled, here('set_up/final_rasters/costs/cost_art_fish.ti
 ```
 
 
+For fun... an interactive map of the final artisanal fishing pressure raster!
 ```{r}
 tmap_mode("view") # Set to interactive viewing
 
@@ -98,3 +106,11 @@ tm_shape(art_fish_rescaled) +
   
 ```
 
+Citations:
+ - 
+ 
+Outputs:
+
+ - `cost_art_fish.tif` = raster of rescaled artisanal fishing pressure
+
+End script.
