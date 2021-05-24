@@ -28,7 +28,7 @@ Step 4 to run sensitivity analysis of locking in vs locking out MPAs
 
 ----
 
-### **STEP 1: Assign planning units, cost layer, and conservation feature**
+## **STEP 1: Assign planning units, cost layer, and conservation feature**
 
 #### Planning Unit
 ```{r}
@@ -72,18 +72,17 @@ plot(exist_mpas)
 ### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
 ```{r}
 # if you decide to change the gap, time-limit or boundary penalty value, change it here and rerun the subsequent model runs
-
 gap <- 0.01
 time_limit <- 21600
 bp <- 0.000001
 ```
 
 
-### **STEP 2: Run Models with varying targets**
+## **STEP 2: Run Models with varying targets**
 
 #### RUN 1: Artisanal - 10% target, Boundary Penalty = 0 
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_artisanal_10 <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
@@ -161,11 +160,11 @@ writeRaster(sprob_artisanal_50, here("final_results", "scenario_2_artisanal", "s
 ```
 
 
-### **STEP 3: Run Models with efficient boundary penalty (0.000001)**
+## **STEP 3: Run Models with efficient boundary penalty (0.000001)**
 
 #### RUN 5: Artisanal - 10% target, Boundary Penalty = 0.000001
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_artisanal_10_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
@@ -207,7 +206,7 @@ writeRaster(sprob_artisanal_20_blm, here("final_results", "scenario_2_artisanal"
 
 #### RUN 7: Artisanal - 30% target, Boundary Penalty = 0.000001
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 
 prob_artisanal_30_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
@@ -229,7 +228,7 @@ writeRaster(sprob_artisanal_30_blm, here("final_results", "scenario_2_artisanal"
 
 #### RUN 8: Artisanal - 50% target, Boundary Penalty = 0.000001
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_artisanal_50_blm <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
@@ -248,12 +247,12 @@ writeRaster(sprob_artisanal_50_blm, here("final_results", "scenario_2_artisanal"
 ```
 
 
-### **STEP 4: Run Models with MPA sensitivity analysis**
+## **STEP 4: Run Models with MPA sensitivity analysis**
 
 #### RUN 9: Artisanal - 20% targets, boundary penalty = 0, and no MPAs locked in
 ```{r}
 
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_artisanal_20_nompa <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
@@ -272,7 +271,7 @@ writeRaster(sprob_artisanal_20_nompa, here("final_results", "scenario_2_artisana
 
 #### RUN 10: Artisanal - 20% targets, boundary penalty = 0.000001, and no MPAs locked in
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_artisanal_20_blm_nompa <- problem(cost_artisanal, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%

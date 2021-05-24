@@ -28,7 +28,7 @@ Step 4 to run sensitivity analysis of locking in vs locking out MPAs
 
 ----
 
-### **STEP 1: Assign planning units, cost layer, and conservation feature**
+## **STEP 1: Assign planning units, cost layer, and conservation feature**
 
 #### Planning Unit
 ```{r}
@@ -38,7 +38,6 @@ pu_3 <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.t
 # ### plot to make sure it looks okay
 plot(pu_3)
 ```
-
 
 #### Cost Layer
 ```{r}
@@ -51,7 +50,6 @@ plot(cost_industrial)
 
 #### Conservation Features
 This includes all species distributions and habitat rasters
-
 ```{r}
 # List of conservation features that will have been loaded into the global environment in other
 ### pull in species stack that we created in set-up step 3
@@ -64,23 +62,22 @@ plot(features_stack_3)
 ### Additional Files (Locked-in & Locked-out)
 ```{r}
 ### read in existing mpas raster
-exist_mpas_3 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
+exist_mpas <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
 
 ### plot to make sure it looks okay
-plot(exist_mpas_3)
+plot(exist_mpas)
 ```
 
 ### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
 ```{r}
 # if you decide to change the gap, time-limit or boundary penalty value, change it here and rerun the subsequent model runs
-
 gap <- 0.01
 time_limit <- 21600
 bp <- 0.000001
 ```
 
 
-### **STEP 2: Run Models with varying targets**
+## **STEP 2: Run Models with varying targets**
 
 #### RUN 1: Industrial - 10% target, Boundary Penalty = 0 
 ```{r}
@@ -88,7 +85,7 @@ bp <- 0.000001
 prob_industrial_10 <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
@@ -108,7 +105,7 @@ writeRaster(sprob_industrial_10, here("final_results", "scenario_3_industrial", 
 prob_industrial_20 <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
@@ -129,7 +126,7 @@ writeRaster(sprob_industrial_20, here("final_results", "scenario_3_industrial", 
 prob_industrial_30 <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
@@ -145,7 +142,7 @@ writeRaster(sprob_industrial_30, here("final_results", "scenario_3_industrial", 
 
 #### RUN 4: Industrial - 50% target, Boundary Penalty = 0 
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_industrial_50 <- problem(cost_industrial, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
@@ -163,7 +160,7 @@ writeRaster(sprob_industrial_50, here("final_results", "scenario_3_industrial", 
 ```
 
 
-### **STEP 3: Run Models with efficient boundary penalty (0.000001)**
+## **STEP 3: Run Models with efficient boundary penalty (0.000001)**
 
 #### Run 5: Industrial - 10% target, Boundary Penaly = 0.000001
 ```{r}
@@ -171,14 +168,14 @@ writeRaster(sprob_industrial_50, here("final_results", "scenario_3_industrial", 
 prob_industrial_10_blm <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_industrial_10_blm <- solve(prob_industrial_10_blm)
 
-## Plot the solutionto preview
+## Plot the solution to preview
 plot(sprob_industrial_10_blm,  main = c("industrial- 10% targets with boundary penalty"))
 
 ## Save as tif
@@ -192,7 +189,7 @@ writeRaster(sprob_industrial_10_blm, here("final_results", "scenario_3_industria
 prob_industrial_20_blm <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 
@@ -213,7 +210,7 @@ writeRaster(sprob_industrial_20_blm, here("final_results", "scenario_3_industria
 prob_industrial_30_blm <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 
@@ -227,13 +224,14 @@ plot(sprob_industrial_30_blm,  main = c("industrial- 30% Targets with boundary p
 writeRaster(sprob_industrial_30_blm, here("final_results", "scenario_3_industrial", "sprob_industrial_30_6hr_blm0.000001.tif"), overwrite = TRUE)
 ```
 
+
 #### RUN 8: Industrial - 50% target, Boundary Penalty = 0.000001 
 ```{r}
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_industrial_50_blm <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 
@@ -247,7 +245,7 @@ plot(sprob_industrial_50_blm,  main = c("industrial- 50% targets with boundary p
 writeRaster(sprob_industrial_50_blm, here("final_results", "scenario_3_industrial", "sprob_industrial_50_6hr_blm0.000001.tif"), overwrite = TRUE)
 ```
 
-### **STEP 4: Run Models with MPA sensitivity analysis**
+## **STEP 4: Run Models with MPA sensitivity analysis**
 
 #### Run 9: Industrial - 20% targets, boundary = 0 and no MPAs locked in
 ```{r}
@@ -255,7 +253,6 @@ writeRaster(sprob_industrial_50_blm, here("final_results", "scenario_3_industria
 prob_industrial_20_nompa <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
@@ -277,7 +274,6 @@ writeRaster(sprob_industrial_20_nompa, here("final_results", "sensitivity", "mpa
 prob_industrial_20_blm_nompa <- problem(cost_industrial, features = features_stack_3) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 

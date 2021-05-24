@@ -30,14 +30,14 @@ Step 6 to run sensitivity analysis of aggregation sites
 
 ----
 
-### **STEP 1: Assign planning units, cost layer, and conservation feature**
+## **STEP 1: Assign planning units, cost layer, and conservation feature**
 
 #### Planning Unit
 ```{r}
-# ### reading in the baseline MZ EEZ raster (with cell ids) 
+### reading in the baseline MZ EEZ raster (with cell ids) 
 pu_4 <- raster(here("set_up", "final_rasters", "mz_eez_templates", "mz_rast_id.tif"))
 
-# ### plot to make sure it looks okay
+### plot to make sure it looks okay
 plot(pu_4)
 ```
 
@@ -62,19 +62,18 @@ plot(features_stack_4)
 ```
 
 ### Additional Files (Locked-in & Locked-out)
+
 Marine Protected Areas:
 ```{r}
-# MPAs
 ### read in existing mpas raster
-exist_mpas_4 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
+exist_mpas <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
 
 ### plot to make sure it looks okay
-plot(exist_mpas_4)
+plot(exist_mpas)
 ```
 
 Key Biodiversity Areas:
 ```{r}
-# Key Biodiversity Areas (KBAs)
 ### read in existing kbas raster
 exist_kbas <- raster(here("set_up", "final_rasters", "planning_unit", "kba.tif"))
 
@@ -84,7 +83,6 @@ plot(exist_kbas)
 
 Aggregation Sites:
 ```{r}
-# Aggregation Sites
 ### read in existing aggregation sites raster
 exist_aggs <- raster(here("set_up", "final_rasters", "planning_unit", "aggregation_sites.tif"))
 
@@ -96,14 +94,13 @@ plot(exist_aggs)
 ### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
 ```{r}
 # if you decide to change the gap, time-limit or boundary penalty value, change it here and rerun the subsequent model runs
-
 gap <- 0.01
 time_limit <- 21600
 bp <- 0.000001
 ```
 
 
-### **STEP 2: Run Models with varying targets**
+## **STEP 2: Run Models with varying targets**
 
 #### RUN 1: Combined - 10% target, Boundary Penalty = 0 
 ```{r}
@@ -131,7 +128,7 @@ writeRaster(sprob_combined_10, here("final_results", "scenario_4_combined", "spr
 prob_combined_20 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_4) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
@@ -151,7 +148,7 @@ writeRaster(sprob_combined_20, here("final_results", "scenario_4_combined", "spr
 prob_combined_30 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
-  add_locked_in_constraints(exist_mpas_4) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = 0.01, time_limit = 120) 
 
 ## Solve problem
@@ -165,14 +162,13 @@ writeRaster(sprob_combined_30, here("final_results", "scenario_4_combined", "spr
 
 ```
 
-
 #### RUN 4: Combined - 50% target, Boundary Penalty = 0,  
 ```{r}
 ## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_50 <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
-  add_locked_in_constraints(exist_mpas_4) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
@@ -187,7 +183,7 @@ writeRaster(sprob_combined_50, here("final_results", "scenario_4_combined", "spr
 ```
 
 
-### **STEP 3: Run Models with efficient boundary penalty (0.000001)**
+## **STEP 3: Run Models with efficient boundary penalty (0.000001)**
 
 #### Run 5: Combined - 10% target, Boundar Penaly = 0.000001
 ```{r}
@@ -195,7 +191,7 @@ writeRaster(sprob_combined_50, here("final_results", "scenario_4_combined", "spr
 prob_combined_10_blm <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 
@@ -216,7 +212,7 @@ writeRaster(sprob_combined_10_blm, here("final_results", "scenario_4_combined", 
 prob_combined_20_blm <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 
@@ -236,7 +232,7 @@ writeRaster(sprob_combined_20_blm, here("final_results", "scenario_4_combined", 
 prob_combined_30_blm <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 
@@ -256,7 +252,7 @@ writeRaster(sprob_combined_30_blm, here("final_results", "scenario_4_combined", 
 prob_combined_50_blm <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
-  add_locked_in_constraints(exist_mpas_3) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 
@@ -275,7 +271,7 @@ writeRaster(sprob_combined_50_blm, here("final_results", "scenario_4_combined", 
 
 #### Run 9: Combined - 20% target, boundary = 0 and no MPAs locked in
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_20_nompa <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
@@ -293,7 +289,7 @@ writeRaster(sprob_combined_20_nompa, here("final_results", "sensitivity", "mpas"
 
 #### Run 10: Combined - 20% target, boundary = 0.000001 and no MPAs locked in
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_20_blm_nompa <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
@@ -315,11 +311,11 @@ writeRaster(sprob_combined_20_blm_nompa, here("final_results", "sensitivity", "m
 
 #### Run 11: Combined - 20% target, boundary = 0 and KBAs & MPAs locked in
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_20_mpa_kba <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
-  add_locked_in_constraints(exist_mpas_4) %>% 
+  add_locked_in_constraints(exist_mpas) %>% 
   add_locked_in_constraints(exist_kbas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit)
 
@@ -336,7 +332,7 @@ writeRaster(sprob_combined_20_mpa_kba , here("final_results", "sensitivity", "ke
 
 #### Run 12: Combined - 20% target, boundary = 0 and KBAs locked in and MPA's not locked in
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_20_kba <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
@@ -357,12 +353,12 @@ writeRaster(sprob_combined_20_kba , here("final_results", "sensitivity", "key_bi
 
 #### Run 13: Combined - 20% target, boundary = 0 and Aggregation Sites & MPAS locked in
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_20_agg_mpa <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_aggs) %>% 
-  add_locked_in_constraints(exist_mpas_4) %>% 
+  add_locked_in_constraints(exist_mpas) %>% 
   add_gurobi_solver(gap = gap, time_limit = time_limit) 
 
 ## Solve problem
@@ -377,7 +373,7 @@ writeRaster(sprob_combined_20_agg_mpa, here("final_results", "sensitivity", "agg
 
 #### Run 14: Combined - 20% target, boundary = 0 and aggregation sites
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_20_agg <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
@@ -396,12 +392,12 @@ writeRaster(sprob_combined_20_agg , here("final_results", "sensitivity", "aggreg
 
 #### Run 15: Combined - 20% target, boundary = 0 with aggregation sites, MPAs and KBAs locked in
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_combined_20_agg <- problem(cost_combined, features = features_stack_4) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.2) %>%
   add_locked_in_constraints(exist_aggs) %>% 
-  add_locked_in_constraints(exist_mpas_4) %>% 
+  add_locked_in_constraints(exist_mpas) %>% 
   add_locked_in_constraints(exist_kbas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) 
 

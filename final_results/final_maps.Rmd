@@ -18,6 +18,8 @@ library(ggmap)
 library(tmap)
 ```
 
+This Rmarkdown is just to create finalized interactive maps for each scenario.
+
 #### **STEP 1: Read in Mozambique EEZ and Shapefile**
 ```{r}
 ## read in MZ EEZ tif
@@ -59,18 +61,9 @@ create_map <- function(final_raster, mpas){
 	            labels = c('Suggested Areas','Existing MPAs'),
 	            title="Prioritization Model")
 }
-
-## create function to calculate the percentage of protected area
-calc_percent_protected <- function(final_raster, x){
-  final_raster_df <- rasterToPoints(final_raster) %>%
-  as.data.frame() %>%
-  group_by({{x}}) %>%
-  summarise(count = n()) %>%
-  mutate(total = (count/sum(count)*100))
-}
-
 ```
-#### **Creating maps for each scenario**
+
+#### **STEP 3: Creating maps for each scenario**
 
 Scenario 1: Area at 20% and BLM at 0 and 0.0000001
 ```{r}
@@ -81,15 +74,10 @@ area_files <- list.files(area_path, full.names = TRUE)
 area_20_blm0.000001 <- raster(area_files[3])
 plot(area_20_blm0.000001)
 
-percent_area_20_blm0.000001 <- calc_percent_protected(area_20_blm0.000001, sprob_area_20_6hr_blm0.000001)
-
 area_20_blm0 <- raster(area_files[4])
 plot(area_20_blm0)
 
-percent_area_20_blm0 <- calc_percent_protected(area_20_blm0, sprob_area_20_6hr_blm0)
-
-
-## create interactive maps for area sc
+## create interactive maps for area
 area_20_blm0.000001_map <- create_map(area_20_blm0.000001, exist_mpas)
 area_20_blm0_map <- create_map(area_20_blm0, exist_mpas)
 
@@ -106,14 +94,10 @@ artisanal_files <- list.files(artisanal_path, full.names = TRUE)
 artisanal_20_blm0.000001 <- raster(artisanal_files[3])
 plot(artisanal_20_blm0.000001)
 
-percent_artisanal_20_blm0.000001 <- calc_percent_protected(artisanal_20_blm0.000001, sprob_artisanal_20_6hr_blm0.000001)
-
 artisanal_20_blm0 <- raster(artisanal_files[4])
 plot(artisanal_20_blm0)
 
-percent_artisanal_20_blm0 <- calc_percent_protected(artisanal_20_blm0, sprob_artisanal_20_6hr_blm0)
-
-## create interactive maps for artisanal sc
+## create interactive maps for artisanal 
 artisanal_20_blm0.000001_map <- create_map(artisanal_20_blm0.000001, exist_mpas)
 artisanal_20_blm0_map <- create_map(artisanal_20_blm0, exist_mpas)
 
@@ -130,14 +114,10 @@ industrial_files <- list.files(industrial_path, full.names = TRUE)
 industrial_20_blm0.000001 <- raster(industrial_files[3])
 plot(industrial_20_blm0.000001)
 
-percent_industrial_20_blm0.000001 <- calc_percent_protected(industrial_20_blm0.000001, sprob_industrial_20_6hr_blm0.000001)
-
 industrial_20_blm0 <- raster(industrial_files[4])
 plot(industrial_20_blm0)
 
-percent_industrial_20_blm0 <- calc_percent_protected(industrial_20_blm0, sprob_industrial_20_6hr_blm0)
-
-## create interactive maps for industrial sc
+## create interactive maps for industrial 
 industrial_20_blm0.000001_map <- create_map(industrial_20_blm0.000001, exist_mpas)
 industrial_20_blm0_map <- create_map(industrial_20_blm0, exist_mpas)
 
@@ -155,14 +135,10 @@ combined_files <- list.files(combined_path, full.names = TRUE)
 combined_20_blm0.000001 <- raster(combined_files[4])
 plot(combined_20_blm0.000001)
 
-percent_combined_20_blm0.000001 <- calc_percent_protected(combined_20_blm0.000001, sprob_combined_20_6hr_blm0.000001)
-
 combined_20_blm0 <- raster(combined_files[14])
 plot(combined_20_blm0)
 
-percent_combined_20_blm0 <- calc_percent_protected(combined_20_blm0, sprob_combined_20_6hr_blm0)
-
-## create interactive maps for combined sc
+## create interactive maps for combined 
 combined_20_blm0.000001_map <- create_map(combined_20_blm0.000001, exist_mpas)
 combined_20_blm0_map <- create_map(combined_20_blm0, exist_mpas)
 
@@ -180,14 +156,10 @@ inverse_files <- list.files(inverse_path, full.names = TRUE)
 inverse_20_blm0.000001 <- raster(inverse_files[3])
 plot(inverse_20_blm0.000001)
 
-percent_inverse_20_blm0.000001 <- calc_percent_protected(inverse_20_blm0.000001, sprob_combined_inverse_20_6hr_blm0.000001)
-
 inverse_20_blm0 <- raster(inverse_files[4])
 plot(inverse_20_blm0)
 
-percent_inverse_20_blm0 <- calc_percent_protected(inverse_20_blm0, sprob_combined_inverse_20_6hr_blm0)
-
-## create interactive maps for inverse sc
+## create interactive maps for inverse
 inverse_20_blm0.000001_map <- create_map(inverse_20_blm0.000001, exist_mpas)
 inverse_20_blm0_map <- create_map(inverse_20_blm0, exist_mpas)
 
@@ -195,39 +167,25 @@ tmap_save(inverse_20_blm0.000001_map, filename = "final_results/final_maps/inver
 tmap_save(inverse_20_blm0_map, filename = "final_results/final_maps/inverse_20_blm0_map.html")
 ```
 
-#### Create maps of cost layers
-
+Scenario 6: Management at 10% and BLM at 0 and 0.0000001
 ```{r}
 ### create file path to read in final raster
-cost_path <- here("set_up", "final_rasters", "costs")
-cost_files <- list.files(cost_path, full.names = TRUE)
+management_path <- here("final_results", "scenario_6_management")
+management_files <- list.files(management_path, full.names = TRUE)
 
-area_cost <- raster(cost_files[1])
-plot(area_cost)
+management_10_blm0.000001 <- raster(management_files[1])
+plot(management_10_blm0.000001)
 
-# inverse_20_blm0 <- raster(inverse_files[4])
-# plot(inverse_20_blm0)
-# 
-# ## create interactive maps for inverse sc
-# inverse_20_blm0.000001_map <- create_map(inverse_20_blm0.000001, exist_mpas)
-# inverse_20_blm0_map <- create_map(inverse_20_blm0, exist_mpas)
-# 
-# tmap_save(inverse_20_blm0.000001_map, filename = "final_results/final_maps/inverse_20_blm0.000001_map.html")
-# tmap_save(inverse_20_blm0_map, filename = "final_results/final_maps/inverse_20_blm0_map.html")
+management_10_blm0 <- raster(management_files[2])
+plot(management_10_blm0)
+
+## create interactive maps for inverse
+management_10_blm0.000001_map <- create_map(management_10_blm0.000001, exist_mpas)
+management_10_blm0_map <- create_map(management_10_blm0, exist_mpas)
+
+tmap_save(management_10_blm0.000001_map, filename = "final_results/final_maps/inverse_20_blm0.000001_map.html")
+tmap_save(management_10_blm0_map, filename = "final_results/final_maps/inverse_20_blm0_map.html")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

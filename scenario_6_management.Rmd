@@ -17,7 +17,13 @@ library(rgdal)
 library(gurobi)
 ```
 
-### **STEP 1: Assign planning units, cost layer, and conservation feature**
+# Scenario 6 - Management 
+The objective of this scenario was to protect important areas for sharks and rays based on their distribution from IUCN and location of suitable habitats while remaining relatively close to the shore for management purposes (<50m depth).  For this run, we used the inverse of the combined fishing distance decay raster as the cost, set targets of 20% for all conservation features, locked in planning units that included existing MPAs, and set a boundary penalty to zero. 
+
+Step 1 reads in all the necessary data
+Step 2 run to see results of varying targets from 10-50% and boundary penalties
+
+## **STEP 1: Assign planning units, cost layer, and conservation feature**
 
 #### Planning Unit
 ```{r}
@@ -47,24 +53,25 @@ features_stack_6 <- brick(here("set_up", "final_rasters", "conservation_features
 plot(features_stack_6)
 ```
 
-### Additional Files (Locked-in & Locked-out)
+#### Additional Files (Locked-in & Locked-out)
 ```{r}
 ### read in existing mpas raster
-exist_mpas_6 <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
+exist_mpas <- raster(here("set_up", "final_rasters", "planning_unit", "exist_mpa.tif"))
 
 ### plot to make sure it looks okay
-plot(exist_mpas_6)
+plot(exist_mpas)
 ```
 
 
-### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
+#### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
 ```{r}
 # if you decide to change the gap, time-limit or boundary penalty value, change it here and rerun the subsequent model runs
-
 gap <- 0.01
 time_limit <- 21600
 bp <- 0.000001
 ```
+
+## **STEP 2: Run Models with varying targets**
 
 #### RUN 1: Baseline - 10% target, Boundary Penalty = 0 
 ```{r}
@@ -72,7 +79,7 @@ bp <- 0.000001
 prob_management_10 <- problem(cost_distance, features = features_stack_6) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
-  add_locked_in_constraints(exist_mpas_6) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
@@ -91,7 +98,7 @@ writeRaster(sprob_management_10, here("final_results", "scenario_6_management", 
 prob_management_10_blm <- problem(cost_distance, features = features_stack_6) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.1) %>%
-  add_locked_in_constraints(exist_mpas_6) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 
@@ -112,7 +119,7 @@ writeRaster(sprob_management_10_blm, here("final_results", "scenario_6_managemen
 prob_management_.05 <- problem(cost_distance, features = features_stack_6) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.05) %>%
-  add_locked_in_constraints(exist_mpas_6) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit)
 
 ## Solve problem
@@ -131,7 +138,7 @@ writeRaster(sprob_management_.05, here("final_results", "scenario_6_management",
 prob_management_.05_blm <- problem(cost_distance, features = features_stack_6) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.05) %>%
-  add_locked_in_constraints(exist_mpas_6) %>%
+  add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
   add_boundary_penalties(bp)
 

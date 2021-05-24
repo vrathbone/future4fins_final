@@ -18,12 +18,15 @@ library(rgdal)
 library(gurobi)
 ```
 
-## Scenario 1 - Baseline
+# Scenario 1 - Baseline (Area)
 The objective of this scenario was to protect important areas for sharks and rays based on their distribution from IUCN and location of suitable habitats using a uniform cost for all planning units. For this run, we used area as the cost, set targets of 20% for all conservation features, locked in planning units that included existing MPAs, and set a boundary penalty to zero. 
 
-Run step 1 to read in all the necessary data, step 2 to see the results of varying targets from 10-50%, step 3 to see varying targets using a boundary penalty, and step 4 to run sensitivity analsyis of locking in vs locking out MPAs. 
+ - Step 1 to read in all the necessary data, 
+ - Step 2 to see the results of varying targets from 10-50%
+ - Step 3 to see varying targets using a boundary penalty
+ - Step 4 to run sensitivity analysis of locking in vs locking out MPAs. 
 
-### **STEP 1: Assign planning units, cost layer, and conservation feature**
+## **STEP 1: Assign planning units, cost layer, and conservation feature**
 
 #### Planning Unit
 ```{r}
@@ -66,15 +69,14 @@ plot(exist_mpas)
 
 ### Set the some of the global model parameters like gap, time limit, and efficient boundary penalty to use in soem runs:
 ```{r}
-# if you decide to change the gap, time-limite or boundary penalty value, change it here and rerun the subsequent model runs
-
+# if you decide to change the gap, time-limit or boundary penalty value, change it here and rerun the subsequent model runs
 gap <- 0.01
 time_limit <- 21600
 bp <- 0.000001
 
 ```
 
-### **STEP 2: Run Models with varying targets**
+## **STEP 2: Run Models with varying targets**
 
 #### RUN 1: Baseline - 10% target, Boundary Penalty = 0 
 ```{r}
@@ -116,7 +118,7 @@ writeRaster(sprob_area_20, here("final_results", "scenario_1_area",  "sprob_area
 
 #### RUN 3: Baseline -30% target, Boundary Penaly = 0 
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_area_30 <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.3) %>%
@@ -136,7 +138,7 @@ writeRaster(sprob_area_30, here("final_results", "scenario_1_area",  "sprob_area
 
 #### RUN 4: Baseline - 50% target, Boundary Penalty = 0 
 ```{r}
-## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objecive
+## Define the problem with the cost, conservation features, targets, locked in and locked out constraints using the minimum set objective
 prob_area_50 <- problem(cost_area, features = features_stack) %>%
   add_min_set_objective() %>%
   add_relative_targets(0.5) %>%
@@ -154,7 +156,7 @@ writeRaster(sprob_area_50, here("final_results", "scenario_1_area",  "sprob_area
 ```
 
 
-### **STEP 3: Run Models with efficient boundary penalty (0.000001)**
+## **STEP 3: Run Models with efficient boundary penalty (0.000001)**
 
 #### RUN 5: Baseline - 10% Targets, Boundary Penalty - 0.000001
 ```{r}
@@ -225,7 +227,7 @@ prob_area_20 <- problem(cost_area, features = features_stack) %>%
   add_relative_targets(0.5) %>%
   add_locked_in_constraints(exist_mpas) %>%
   add_gurobi_solver(gap = gap, time_limit = time_limit) %>% 
-  add_boundary_penalties(0.000001)
+  add_boundary_penalties(bp)
 
 ## Solve problem
 sprob_area_50 <- solve(prob_area_50)
@@ -237,7 +239,7 @@ writeRaster(sprob_area_50, here("final_results", "scenario_1_area",  "sprob_area
 ```
 
 
-### **STEP 4: Run Models with MPA sensitivity analysis**
+## **STEP 4: Run Models with MPA sensitivity analysis**
 
 #### RUN 9: Baseline - 20% targets, boundary penalty = 0, and no MPAs locked in
 ```{r}
