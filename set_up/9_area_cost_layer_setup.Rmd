@@ -66,9 +66,6 @@ tm_shape(cost_area) +
   
 ```
 
-Citations:
- - 
- 
 Outputs:
 
  - `area_cost.tif` = raster of area cost layer

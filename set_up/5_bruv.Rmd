@@ -16,8 +16,7 @@ library(tmap)
 library(ggmap)
 ```
 
-## *WCS BRUV MaxN data*
-Unsure about the length sheet...
+Here, we pulled in the WCS BRUV data and other BRUV data sets provided to validate our species distribution ranges from the IUCN maps. 
 
 ### *STEP 1: Read in WCS BRUV data*
 ```{r, include = FALSE}
@@ -242,7 +241,12 @@ writeRaster(nm_bruv_rast, here('set_up/final_rasters/bruv/nm_bruv.tif'), overwri
 ```
 
 
+Citations:
+WCS - BRUV - Wildlife Conservation Society, 2020-2021.
+FinPrint BRUV Data - Bazaruto - Wildlife Conservation Society, 2020-2022.
+FinPrint BRUV Data - Ponta de Ouro Partial Marine Reserve - Wildlife Conservation Society, 2020-2023.
 
+End script.
 
 
 

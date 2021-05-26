@@ -257,12 +257,9 @@ features_df <- as.data.frame(features_stack)
 
 ### write raster
 writeRaster(features_stack, here('set_up/final_rasters/conservation_features/all_features_stack.tif'),options="INTERLEAVE=BAND", overwrite = TRUE)
+
 ```
 
-
-Citations:
- - 
- 
 Outputs:
  -`aca_coral` = raster of coral within Mozambique EEZ at 100m resolution
  -`aca_coral_agg` = raster of coral within Mozambique EEZ aggregated to match 10000m resolution
@@ -274,7 +271,16 @@ Outputs:
  -`seamounts` = raster of seamounts within Mozambique EEZ at 10000m resolution
  -`habitat_stack` = raster stack of all critical habitats
 
+
+Citations:
+
+Coral Reefs: Jiwei Li, David E. Knapp, Nicholas S. Fabina, Emma V. Kennedy, Kirk Larsen, Mitchell B. Lyons, Nicholas J. Murray, Stuart R. Phinn, Chris M. Roelfsema, and Gregory P. Asner. A global coral reef probability map generated using convolutional neural networks. Coral Reefs. 2020. Advance online publication. https://doi.org/10.1007/s00338-020-02005-6
+
+Mangroves: Giri C, Ochieng E, Tieszen LL, Zhu Z, Singh A, Loveland T, Masek J, Duke N (2011). Status and distribution of mangrove forests of the world using earth observation satellite data (version 1.3, updated by UNEP-WCMC). Global Ecology and Biogeography 20: 154-159. Paper DOI: 10.1111/j.1466-8238.2010.00584.x; Data URL: http://data.unep-wcmc.org/datasets/4
+
+Seamounts and Knolls: Yesson C, Clark MR, Taylor M, Rogers AD (2011). The global distribution of seamounts based on 30-second bathymetry data. Deep Sea Research Part I: Oceanographic Research Papers 58: 442-453. DOI: http://dx.doi.org/10.1016/j.dsr.2011.02.004. Data DOI: http://doi.pangaea.de/10.1594/PANGAEA.757564.
  
+
 End script.
 
 

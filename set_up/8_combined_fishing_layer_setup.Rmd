@@ -158,9 +158,6 @@ plot(combined_reclass_dist_rast)
 writeRaster(combined_dist_rast, here('set_up/final_rasters/costs/combined_reclass_dist_rast.tif'), overwrite = TRUE)
 ```
 
-Citations:
- - 
- 
 Outputs:
 
  - `combined_stack_sum.tif` = raster of summed combined fishing pressure

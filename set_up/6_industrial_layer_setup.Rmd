@@ -286,14 +286,15 @@ tm_shape(industrial_stack_sum_rescaled) +
   tm_raster("layer", alpha=0.9, palette = "viridis")
   
 ```
-
-Citations:
- - 
  
 Outputs:
 
  - `cost_industrial_sum.tif` = raster of summed and rescaled industrial fishing pressure
  - `cost_industrial_sum_unscaled.tif` = raster of summed industrial fishing pressure (not rescaled)
+ 
+
+Citations:
+Vessel Monitoring System (VMS) data - Wildlife Conservation Society, 2020.
 
 
 End script.

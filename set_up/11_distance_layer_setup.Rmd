@@ -140,9 +140,6 @@ writeRaster(dist_rescaled, here('set_up/final_rasters/costs/dist_50_rast.tif'), 
 
 ```
 
-
-Citations:
- - 
  
 Outputs:
 

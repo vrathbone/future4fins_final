@@ -83,9 +83,6 @@ tm_shape(combined_inverse_simple_rast) +
   
 ```
 
-Citations:
- - 
- 
 Outputs:
 
  - `combined_inverse_simple.tif` = inverse raster of combined fishing pressure (simple method)

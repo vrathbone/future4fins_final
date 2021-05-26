@@ -159,13 +159,13 @@ species_status_stack_df <- as.data.frame(species_status_stack)
 writeRaster(species_status_stack, here('set_up/final_rasters/conservation_features/iucn_species_status/species_status_stack.tif'), options="INTERLEAVE=BAND",  overwrite = TRUE)
 ```
 
-
-Citations:
- - IUCN (International Union for Conservation of Nature) 2021. *Chondrichthyes (sharks, rays and chimaeras). The IUCN Red List of Threatened Species*. Version 6.2. https://www.iucnredlist.org. Downloaded on 24 Janurary 2021.
- 
 Outputs:
  - `species_XXX XXX` = tif files of each focal species to be used with risk level as weight (27 total)
  - `species_status_stack.tif` = raster stack of all focal species for conservation features with risk level
+
+
+Citations:
+ - IUCN (International Union for Conservation of Nature) 2021. *Chondrichthyes (sharks, rays and chimaeras). The IUCN Red List of Threatened Species*. Version 6.2. https://www.iucnredlist.org. Downloaded on 24 Janurary 2021.
  
  
 End script.

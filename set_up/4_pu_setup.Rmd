@@ -17,7 +17,7 @@ library(janitor)
 
 # Planning Units and Locked In & Out Areas
 
-Part of the setup for `Prioritzr` we need to establish our planning units based on the project area and the areas either locked-in or out of the analysis. The actual planning units were already created in `1_MZ_EEZ_raster.Rmd` named `mz_rast_id`, which basically gives each cell in the raster a value. This value will be the same across all rasters created. The existing Marine Protected Areas (MPAs), the Key Biodiversity Areas (KBAs), and Aggregation Sites are rasters that we considered locking in and out of our analysis. Locking-in means that the spatial priorizations will *always include* those areas we locked in, while locking-out will *always exclude* those areas. 
+Part of the setup for `Prioritzr` we need to establish our planning units based on the project area and the areas either locked-in or out of the analysis. The actual planning units were already created in `1_MZ_EEZ_raster.Rmd` named `mz_rast_id`, which basically gives each cell in the raster a value. This value will be the same across all rasters created. The existing Marine Protected Areas (MPAs), the Key Biodiversity Areas (KBAs), and Aggregation Sites are rasters that we considered locking in and out of our analysis. Locking-in means that the spatial prioritizations will *always include* those areas we locked in, while locking-out will *always exclude* those areas. 
 
 ### **STEP 1: Read in Mozambique EEZ and Shapefile**
 Grabbing the project area from the `1_MZ_EEZ_raster.Rmd` with the cell ids and the shapefiles.
@@ -144,7 +144,7 @@ writeRaster(aggregation_rast_agg_per, here('set_up/final_rasters/planning_unit/a
 
 
 Citations:
- - 
+ - Protected Planet: UNEP-WCMC (2020). Protected Area Profile for Mozambique from the World Database of Protected Areas, August 2020. Available at: www.protectedplanet.net
  
 Outputs:
 

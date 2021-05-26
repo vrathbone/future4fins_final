@@ -21,10 +21,10 @@ library(gurobi)
 # Scenario 1 - Baseline (Area)
 The objective of this scenario was to protect important areas for sharks and rays based on their distribution from IUCN and location of suitable habitats using a uniform cost for all planning units. For this run, we used area as the cost, set targets of 20% for all conservation features, locked in planning units that included existing MPAs, and set a boundary penalty to zero. 
 
- - Step 1 to read in all the necessary data, 
+ - Step 1 to read in all the necessary data
  - Step 2 to see the results of varying targets from 10-50%
  - Step 3 to see varying targets using a boundary penalty
- - Step 4 to run sensitivity analysis of locking in vs locking out MPAs. 
+ - Step 4 to run sensitivity analysis of locking in vs locking out MPAs 
 
 ## **STEP 1: Assign planning units, cost layer, and conservation feature**
 
